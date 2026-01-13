@@ -5,6 +5,7 @@
 #include <system_error>
 #include <unistd.h>
 #include <vector>
+#include <sys/wait.h>
 
 #include "structs.h"
 
@@ -89,6 +90,26 @@ void cd_command(BshContext &bsh_context, const vector<string> &args) {
     bsh_context.current_dir = fs::canonical(target).string();
 }
 
+void run_command(const vector<string> &command_parts) {
+    pid_t pid = fork();
+    if (pid == 0) {
+        vector<char*> argv;
+        for (const string &s : command_parts) {
+            argv.push_back(const_cast<char*>(s.c_str()));
+        }
+        argv.push_back(nullptr);
+
+        execvp(argv[0], argv.data());
+
+        perror("failed to execute command");
+        exit(1);
+    } else if (pid != 0) {
+        waitpid(pid, nullptr, 0);
+    } else {
+        perror("fork failed");
+    }
+}
+
 void handle_command(BshContext &bsh_context) {
     vector<string> command_split = split_command(bsh_context.command);
     if (command_split.empty()) {
@@ -103,5 +124,7 @@ void handle_command(BshContext &bsh_context) {
         fmt::println("{}", bsh_context.current_dir);
     } else if (exe == "cd") {
         cd_command(bsh_context, args);
+    } else {
+        run_command(command_split);
     }
 }

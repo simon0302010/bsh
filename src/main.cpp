@@ -2,8 +2,10 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <ios>
 #include <iostream>
+#include <linux/limits.h>
 #include <signal.h>
 #include <string>
 #include <fmt/base.h>
@@ -19,7 +21,7 @@
 using namespace std;
 
 void sigint_handler(int s) {
-    printf("\n");
+    fmt::print("\n");
 }
 
 int main() {
@@ -32,6 +34,9 @@ int main() {
 
     sigaction(SIGINT, &sigIntHandler, NULL);
 
+    // context struct
+    BshContext bsh_context;
+
     // get home directory and username
     struct passwd *pw = getpwuid(getuid());
 
@@ -41,10 +46,15 @@ int main() {
     if (gethostname(hostname, HOST_NAME_MAX - 1) != 0) {
         perror("gethostname failed");
     }
+    char cwd[PATH_MAX];
+    if (strcmp(getcwd(cwd, PATH_MAX - 1), "Success") == 0) {
+        perror("getcwd failed");
+        bsh_context.current_dir = homedir;
+    } else {
+        bsh_context.current_dir = string(cwd);
+    }
 
     // main loop
-    BshContext bsh_context;
-    bsh_context.current_dir = homedir;
     bsh_context.home_dir = homedir;
 
     while (true) {
