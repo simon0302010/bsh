@@ -6,14 +6,16 @@
 #include <iostream>
 #include <signal.h>
 #include <string>
+#include <fmt/base.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <limits.h>
+
+#include "command.h"
+#include "utils.h"
 
 using namespace std;
-
-void handle_command(string command) {
-    if (command == "exit") {
-        exit(0);
-    }
-}
 
 void sigint_handler(int s) {
     printf("\n");
@@ -29,14 +31,30 @@ int main() {
 
     sigaction(SIGINT, &sigIntHandler, NULL);
 
+    // get home directory and username
+    struct passwd *pw = getpwuid(getuid());
+
+    string homedir = string(pw->pw_dir);
+    string username = string(pw->pw_name);
+    char hostname[HOST_NAME_MAX];
+    if (gethostname(hostname, HOST_NAME_MAX - 1) != 0) {
+        perror("gethostname failed");
+    }
+
     // main loop
-    string command;
+    struct {
+        string command;
+        string current_dir;
+    } bsh_context;
+
+    bsh_context.current_dir = homedir;
+
     while (true) {
-        printf("$ ");
-        if (!getline(cin, command)) {
+        fmt::print("{}@{}:{} $ ", username, hostname, replace_all(bsh_context.current_dir, homedir, "~"));
+        if (!getline(cin, bsh_context.command)) {
             cin.clear();
             continue;
         }
-        handle_command(command);
+        handle_command(bsh_context.command);
     }
 }
