@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <filesystem>
-#include <fmt/base.h>
+#include <fmt/core.h>
+#include <fmt/format.h>
 #include <string>
 #include <system_error>
 #include <unistd.h>
@@ -92,7 +93,7 @@ void cd_command(BshContext &bsh_context, const vector<string> &args) {
     chdir(bsh_context.current_dir.c_str());
 }
 
-void run_command(const vector<string> &command_parts) {
+void run_command(const vector<string> &command_parts, string command) {
     pid_t pid = fork();
     if (pid == 0) {
         vector<char*> argv;
@@ -103,7 +104,8 @@ void run_command(const vector<string> &command_parts) {
 
         execvp(argv[0], argv.data());
 
-        perror("failed to execute command");
+        string error_msg = ("failed to execute " + command);
+        perror(error_msg.c_str());
         exit(1);
     } else if (pid != 0) {
         waitpid(pid, nullptr, 0);
@@ -128,6 +130,6 @@ void handle_command(BshContext &bsh_context) {
     } else if (exe == "cd") {
         cd_command(bsh_context, args);
     } else {
-        run_command(command_split);
+        run_command(command_split, bsh_context.command);
     }
 }

@@ -1,6 +1,6 @@
 CC = g++
-CFLAGS = -Wall -O3
-LDFLAGS = -lfmt
+CFLAGS = -Wall -O3 -std=c++20
+LDFLAGS = -lfmt -lreadline -lncurses
 TARGET = bsh
 SRCDIR = src
 OBJDIR = obj

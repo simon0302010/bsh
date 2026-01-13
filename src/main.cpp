@@ -3,16 +3,17 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <ios>
-#include <iostream>
+#include <fmt/base.h>
 #include <linux/limits.h>
 #include <signal.h>
 #include <string>
-#include <fmt/base.h>
+#include <fmt/core.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
 #include <limits.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include "command.h"
 #include "structs.h"
@@ -21,7 +22,11 @@
 using namespace std;
 
 void sigint_handler(int s) {
+    rl_free_line_state();
+    rl_cleanup_after_signal();
     fmt::print("\n");
+    rl_on_new_line();
+    rl_redisplay();
 }
 
 int main() {
@@ -58,11 +63,13 @@ int main() {
     bsh_context.home_dir = homedir;
 
     while (true) {
-        fmt::print("{}@{}:{} $ ", username, hostname, replace_all(bsh_context.current_dir, homedir, "~"));
-        if (!getline(cin, bsh_context.command)) {
-            cin.clear();
+        string prompt = fmt::format("{}@{}:{} $ ", username, hostname, replace_all(bsh_context.current_dir, homedir, "~"));
+        const char* command = readline(prompt.c_str());
+        bsh_context.command = string(command);
+        if (bsh_context.command.empty()) {
             continue;
         }
+        add_history(command);
         handle_command(bsh_context);
     }
 }
