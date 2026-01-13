@@ -45,6 +45,7 @@ int main() {
     // main loop
     BshContext bsh_context;
     bsh_context.current_dir = homedir;
+    bsh_context.home_dir = homedir;
 
     while (true) {
         fmt::print("{}@{}:{} $ ", username, hostname, replace_all(bsh_context.current_dir, homedir, "~"));
