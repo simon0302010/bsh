@@ -1,5 +1,9 @@
+#include <cstdio>
+#include <fmt/base.h>
 #include <string>
 #include <vector>
+
+#include "structs.h"
 
 using namespace std;
 
@@ -39,9 +43,17 @@ vector<string> split_command(string command) {
     return args;
 }
 
-void handle_command(string command) {
-    vector<string> command_split = split_command(command);
-    if (command == "exit") {
+void handle_command(BshContext &bsh_context) {
+    vector<string> command_split = split_command(bsh_context.command);
+    if (command_split.empty()) {
+        return;
+    }
+
+    string exe = command_split[0];
+    vector<string> args(command_split.begin() + 1, command_split.end());
+    if (exe == "exit") {
         exit(0);
+    } else if (exe == "pwd") {
+        fmt::println("{}", bsh_context.current_dir);
     }
 }

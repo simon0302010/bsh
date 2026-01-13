@@ -13,6 +13,7 @@
 #include <limits.h>
 
 #include "command.h"
+#include "structs.h"
 #include "utils.h"
 
 using namespace std;
@@ -42,11 +43,7 @@ int main() {
     }
 
     // main loop
-    struct {
-        string command;
-        string current_dir;
-    } bsh_context;
-
+    BshContext bsh_context;
     bsh_context.current_dir = homedir;
 
     while (true) {
@@ -55,6 +52,6 @@ int main() {
             cin.clear();
             continue;
         }
-        handle_command(bsh_context.command);
+        handle_command(bsh_context);
     }
 }

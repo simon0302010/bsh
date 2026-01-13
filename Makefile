@@ -2,26 +2,22 @@ CC = g++
 CFLAGS = -Wall -O2
 LDFLAGS = -lfmt
 TARGET = bsh
+SRCDIR = src
+OBJDIR = obj
+
+SRC = $(SRCDIR)/main.cpp $(SRCDIR)/command.cpp $(SRCDIR)/utils.cpp
+OBJ = $(OBJDIR)/main.o $(OBJDIR)/command.o $(OBJDIR)/utils.o
 
 all: $(TARGET)
-	@make clean-obj
 
-$(TARGET): main.o command.o utils.o
-	$(CC) $(CFLAGS) -o $(TARGET) main.o command.o utils.o $(LDFLAGS)
+$(TARGET): $(OBJ)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ) $(LDFLAGS)
 
-main.o: main.cpp command.h utils.h
-	$(CC) $(CFLAGS) -c main.cpp
-
-command.o: command.cpp command.h utils.h
-	$(CC) $(CFLAGS) -c command.cpp
-
-utils.o: utils.cpp utils.h
-	$(CC) $(CFLAGS) -c utils.cpp
-
-clean-obj:
-	rm -f *.o
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	@mkdir -p $(OBJDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o $(TARGET)
+	rm -rf $(OBJDIR) $(TARGET)
 
 .PHONY: all clean
