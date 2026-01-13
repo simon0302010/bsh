@@ -8,6 +8,7 @@
 #include <sys/wait.h>
 
 #include "structs.h"
+#include "utils.h"
 
 using namespace std;
 using namespace fmt;
@@ -88,6 +89,7 @@ void cd_command(BshContext &bsh_context, const vector<string> &args) {
     }
 
     bsh_context.current_dir = fs::canonical(target).string();
+    chdir(bsh_context.current_dir.c_str());
 }
 
 void run_command(const vector<string> &command_parts) {
@@ -115,6 +117,7 @@ void handle_command(BshContext &bsh_context) {
     if (command_split.empty()) {
         return;
     }
+    command_split = expand_home(command_split, bsh_context.home_dir);
 
     string exe = command_split[0];
     vector<string> args(command_split.begin() + 1, command_split.end());
