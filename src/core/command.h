@@ -1,7 +1,7 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#include "structs.h"
+#include "context.h"
 
 bool handle_command(BshContext &bsh_context);
 

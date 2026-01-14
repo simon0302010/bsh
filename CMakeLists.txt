@@ -6,7 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 file(GLOB SOURCES
     "src/*.cpp"
-    "src/commands/*.cpp"
+    "src/core/*.cpp"
+    "src/builtins/*.cpp"
+    "src/history/*.cpp"
+    "src/utils/*.cpp"
 )
 
 add_executable(bsh ${SOURCES})

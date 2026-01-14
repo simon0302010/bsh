@@ -7,11 +7,11 @@
 #include <vector>
 #include <sys/wait.h>
 
-#include "structs.h"
-#include "utils.h"
-#include "commands/cd.h"
-#include "commands/about.h"
-#include "globals.h"
+#include "context.h"
+#include "../utils/utils.h"
+#include "../builtins/cd.h"
+#include "../builtins/about.h"
+#include "../utils/globals.h"
 
 using namespace std;
 using namespace fmt;

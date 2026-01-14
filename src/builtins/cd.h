@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "../structs.h"
+#include "../core/context.h"
 
 void cd_command(BshContext &bsh_context, const std::vector<std::string> &args);
 
