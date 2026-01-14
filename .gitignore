@@ -1,3 +1,6 @@
 bsh
 .wakatime-project
 build/
+.vscode/
+debug.log
+.cache/

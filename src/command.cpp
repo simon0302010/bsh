@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "commands/cd.h"
 #include "commands/about.h"
+#include "globals.h"
 
 using namespace std;
 using namespace fmt;
@@ -36,24 +37,33 @@ void run_command(const vector<string> &command_parts, string command) {
     }
 }
 
-void handle_command(BshContext &bsh_context) {
+void print_history() {
+    for (string s : history) {
+        println(s);
+    }
+}
+
+bool handle_command(BshContext &bsh_context) {
     vector<string> command_split = split_command(bsh_context.command);
     if (command_split.empty()) {
-        return;
+        return true;
     }
     command_split = expand_home(command_split, bsh_context.home_dir);
 
     string exe = command_split[0];
     vector<string> args(command_split.begin() + 1, command_split.end());
     if (exe == "exit") {
-        exit(0);
+        return false;
     } else if (exe == "pwd") {
         fmt::println("{}", bsh_context.current_dir);
     } else if (exe == "cd") {
         cd_command(bsh_context, args);
     } else if (exe == "about") {
         show_about();
+    } else if (exe == "history") {
+        print_history();
     } else {
         run_command(command_split, bsh_context.command);
     }
+    return true;
 }
