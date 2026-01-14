@@ -6,8 +6,6 @@
 
 #include "structs.h"
 
-using namespace std;
-
 void handle_command(BshContext &bsh_context);
 
 #endif

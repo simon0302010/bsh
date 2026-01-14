@@ -4,7 +4,10 @@ project(bsh VERSION 0.1)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB SOURCES
+    "src/*.cpp"
+    "src/commands/*.cpp"
+)
 
 add_executable(bsh ${SOURCES})
 target_link_libraries(bsh PRIVATE

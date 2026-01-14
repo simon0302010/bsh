@@ -3,12 +3,10 @@
 
 #include <string>
 
-using namespace std;
-
 struct BshContext {
-    string current_dir;
-    string command;
-    string home_dir;
+    std::string current_dir;
+    std::string command;
+    std::string home_dir;
 };
 
 #endif
