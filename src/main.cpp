@@ -69,6 +69,22 @@ int arrow_up(int count, int key) {
     return 0;
 }
 
+vector<string> read_history_file(const string &file_path) {
+    ifstream history_file(file_path);
+    if (!history_file) {
+        return vector<string>();
+    }
+
+    vector<string> lines;
+    string line;
+
+    while (std::getline(history_file, line)) {
+        lines.push_back(line);
+    }
+
+    return lines;
+}
+
 int main() {
     // signal handler
     struct sigaction sigIntHandler;
@@ -102,6 +118,12 @@ int main() {
     // main loop
     bsh_context.home_dir = homedir;
 
+    history = read_history_file(homedir + "/.bsh_history");
+    ofstream history_file(homedir + "/.bsh_history", ios::app);
+    if (!history_file.is_open()) {
+        perror("failed to open history file");
+    }
+
     rl_bind_keyseq("\033[A", arrow_up);
     rl_bind_keyseq("\033[B", arrow_down);
 
@@ -113,6 +135,7 @@ int main() {
             continue;
         }
         history.push_back(command);
+        history_file << command << endl;
         history_idx = -1;
         saved_line.clear();
         if (!handle_command(bsh_context)) {
@@ -120,5 +143,7 @@ int main() {
         }
     }
 
-    debug_log.close();
+    if (history_file.is_open()) {
+        history_file.close(); 
+    }
 }
