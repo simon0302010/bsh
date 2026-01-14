@@ -43,6 +43,7 @@ void print_history() {
     }
 }
 
+// TODO: export command
 bool handle_command(BshContext &bsh_context) {
     vector<string> command = split_command(replace_env_vars(bsh_context.command));
     if (command.empty()) {

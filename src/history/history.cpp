@@ -24,6 +24,7 @@ int arrow_down(int count, int key) {
     return 0;
 }
 
+// TODO: only display with same prefix as currently typed
 int arrow_up(int count, int key) {
     if (history.empty()) return 0;
 
