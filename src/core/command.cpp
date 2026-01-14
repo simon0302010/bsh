@@ -44,14 +44,14 @@ void print_history() {
 }
 
 bool handle_command(BshContext &bsh_context) {
-    vector<string> command_split = split_command(bsh_context.command);
-    if (command_split.empty()) {
+    vector<string> command = split_command(replace_env_vars(bsh_context.command));
+    if (command.empty()) {
         return true;
     }
-    command_split = expand_home(command_split, bsh_context.home_dir);
+    command = expand_home(command, bsh_context.home_dir);
 
-    string exe = command_split[0];
-    vector<string> args(command_split.begin() + 1, command_split.end());
+    string exe = command[0];
+    vector<string> args(command.begin() + 1, command.end());
     if (exe == "exit") {
         return false;
     } else if (exe == "pwd") {
@@ -63,7 +63,7 @@ bool handle_command(BshContext &bsh_context) {
     } else if (exe == "history") {
         print_history();
     } else {
-        run_command(command_split, bsh_context.command);
+        run_command(command, bsh_context.command);
     }
     return true;
 }

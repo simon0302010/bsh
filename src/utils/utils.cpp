@@ -1,8 +1,14 @@
 #include <cstddef>
+#include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <vector>
+#include <regex>
+#include <algorithm>
 
 using namespace std;
+
+regex env_var_pattern(R"(\$\{[A-Za-z_][A-Za-z0-9_]*\}|\$[A-Za-z_][A-Za-z0-9_]*)");
 
 string replace_all(string s, const string& target, const string& replacement) {
     size_t pos = 0;
@@ -59,4 +65,43 @@ vector<string> split_command(const string &command) {
     }
 
     return args;
+}
+
+string replace_env_vars(const string &command) {    
+    string result = command;
+    smatch match;
+    
+    while (regex_search(result, match, env_var_pattern)) {
+        string found_string = match.str();
+        string clean_var = found_string;
+        
+        clean_var.erase(remove(clean_var.begin(), clean_var.end(), '{'), clean_var.end());
+        clean_var.erase(remove(clean_var.begin(), clean_var.end(), '}'), clean_var.end());
+        clean_var.erase(remove(clean_var.begin(), clean_var.end(), '$'), clean_var.end());
+        
+        const char* env_value = getenv(clean_var.c_str());
+        string replacement;
+        
+        if (env_value != nullptr) {
+            // check if already inside quotes
+            size_t pos = match.position();
+            bool already_quoted = false;
+            
+            if (pos > 0 && (result[pos-1] == '"' || result[pos-1] == '\'')) {
+                already_quoted = true;
+            }
+            
+            if (already_quoted) {
+                replacement = string(env_value);
+            } else {
+                replacement = "\"" + string(env_value) + "\"";
+            }
+        } else {
+            replacement = found_string;
+        }
+        
+        result.replace(match.position(), match.length(), replacement);
+    }
+    
+    return result;
 }
