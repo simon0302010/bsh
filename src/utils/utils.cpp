@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <vector>
 #include <regex>
@@ -104,4 +105,11 @@ string replace_env_vars(const string &command) {
     }
     
     return result;
+}
+
+bool starts_with(const string &str, const string &prefix) {
+    if (prefix.size() == 0) {
+        return true;
+    }
+    return str.compare(0, prefix.length(), prefix) == 0;
 }

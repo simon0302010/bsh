@@ -14,7 +14,6 @@
 #include <pwd.h>
 #include <limits.h>
 #include <readline/readline.h>
-#include <readline/history.h>
 #include <vector>
 #include <fstream>
 
@@ -96,4 +95,6 @@ int main() {
     if (history_file.is_open()) {
         history_file.close(); 
     }
+
+    return 0;
 }
