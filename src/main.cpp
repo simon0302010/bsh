@@ -93,6 +93,16 @@ int main() {
         if (!handle_command(bsh_context)) {
             break;
         }
+
+        if (clear_history_file) {
+            history.clear();
+            history_file.close();
+            ofstream ofs;
+            ofs.open(homedir + "/.bsh_history", ofstream::out | ofstream::trunc);
+            ofs.close();
+            history_file.open(homedir + "/.bsh_history", ios::app);
+            clear_history_file = false;
+        }
     }
 
     if (history_file.is_open()) {

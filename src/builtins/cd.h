@@ -6,6 +6,6 @@
 
 #include "../core/context.h"
 
-void cd_command(BshContext &bsh_context, const std::vector<std::string> &args);
+int cd_command(BshContext &bsh_context, const std::vector<std::string> &args);
 
 #endif

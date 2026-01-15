@@ -1,5 +1,5 @@
-#ifndef HISTORY_H
-#define HISTORY_H
+#ifndef UTILS_HISTORY_H
+#define UTILS_HISTORY_H
 
 #include <string>
 #include <vector>

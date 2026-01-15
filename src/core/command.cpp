@@ -13,6 +13,7 @@
 #include "../builtins/cd.h"
 #include "../builtins/about.h"
 #include "../utils/globals.h"
+#include "../builtins/history.h"
 
 using namespace std;
 using namespace fmt;
@@ -42,12 +43,6 @@ void run_command(const vector<string> &command_parts, string command) {
     }
 }
 
-void print_history() {
-    for (const string &s : history) {
-        println("{}", s);
-    }
-}
-
 // TODO: export command
 bool handle_command(BshContext &bsh_context) {
     vector<string> command = split_command(replace_env_vars(bsh_context.command));
@@ -62,12 +57,13 @@ bool handle_command(BshContext &bsh_context) {
         return false;
     } else if (exe == "pwd") {
         fmt::println("{}", bsh_context.current_dir);
+        last_exit_code = 0;
     } else if (exe == "cd") {
-        cd_command(bsh_context, args);
+        last_exit_code = cd_command(bsh_context, args);
     } else if (exe == "about") {
-        show_about();
+        last_exit_code = show_about();
     } else if (exe == "history") {
-        print_history();
+        last_exit_code = history_command(args);
     } else {
         run_command(command, bsh_context.command);
     }

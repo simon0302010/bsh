@@ -4,11 +4,13 @@
 
 using namespace fmt;
 
-void show_about() {
+int show_about() {
     println("bsh Version 0.1");
     println("");
     println("bsh  Copyright (C) 2026  simon0302010");
     println("This program comes with ABSOLUTELY NO WARRANTY; for details type `show w`");
     println("This is free software, and you are welcome to redistribute it");
     println("under certain conditions; type `show c` for details.");
+
+    return 0;
 }

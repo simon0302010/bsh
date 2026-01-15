@@ -9,7 +9,7 @@
 using namespace std;
 using namespace fmt;
 
-void cd_command(BshContext &bsh_context, const vector<string> &args) {
+int cd_command(BshContext &bsh_context, const vector<string> &args) {
     namespace fs = std::filesystem;
 
     fs::path target;
@@ -30,24 +30,26 @@ void cd_command(BshContext &bsh_context, const vector<string> &args) {
 
     if (ec) {
         println("cd: {}: {}", target.string(), ec.message());
-        return;
+        return ec.value();
     }
 
     if (!fs::exists(st)) {
         println("cd: no such file or directory: {}", target.string());
-        return;
+        return 2;
     }
 
     if (!fs::is_directory(st)) {
         println("cd: not a directory: {}", target.string());
-        return;
+        return 3;
     }
 
     if (::chdir(target.c_str()) != 0) {
         println("cd: permission denied: {}", target.string());
-        return;
+        return 4;
     }
 
     bsh_context.current_dir = fs::canonical(target).string();
     chdir(bsh_context.current_dir.c_str());
+
+    return 0;
 }
