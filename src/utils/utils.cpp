@@ -2,10 +2,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <fmt/format.h>
 #include <string>
 #include <vector>
 #include <regex>
 #include <algorithm>
+
+#include "globals.h"
 
 using namespace std;
 
@@ -112,4 +115,11 @@ bool starts_with(const string &str, const string &prefix) {
         return true;
     }
     return str.compare(0, prefix.length(), prefix) == 0;
+}
+
+string get_exit_code_string() {
+    if (last_exit_code != 0) {
+        return fmt::format(" ({})", last_exit_code);
+    }
+    return "";
 }

@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 #include <fmt/base.h>
 #include <fmt/core.h>
 #include <fmt/format.h>
@@ -31,7 +32,11 @@ void run_command(const vector<string> &command_parts, string command) {
         perror(error_msg.c_str());
         exit(1);
     } else if (pid != 0) {
-        waitpid(pid, nullptr, 0);
+        int status = 0;
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status)) {
+            last_exit_code = WEXITSTATUS(status);
+        }
     } else {
         perror("fork failed");
     }
