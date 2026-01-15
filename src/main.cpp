@@ -77,8 +77,11 @@ int main() {
     rl_bind_keyseq("\033[B", arrow_down);
 
     while (true) {
-        string prompt = fmt::format("{}@{}:{} $ ", username, hostname, replace_all(bsh_context.current_dir, homedir, "~"));
+        string prompt = username + "@" + hostname + ":" + replace_all(bsh_context.current_dir, homedir, "~") + " $ ";
         const char* command = readline(prompt.c_str());
+        if (command == nullptr) {
+            break;
+        }
         bsh_context.command = string(command);
         if (bsh_context.command.empty()) {
             continue;

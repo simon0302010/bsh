@@ -38,8 +38,8 @@ void run_command(const vector<string> &command_parts, string command) {
 }
 
 void print_history() {
-    for (string s : history) {
-        println(s);
+    for (const string &s : history) {
+        println("{}", s);
     }
 }
 
