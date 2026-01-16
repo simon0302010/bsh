@@ -123,3 +123,19 @@ string get_exit_code_string() {
     }
     return "";
 }
+
+vector<vector<string>> split_vector(const vector<string> items, string splitter) {
+    vector<vector<string>> splitted_vector;
+    vector<string> current_vector;
+    for (string item : items) {
+        if (item == splitter) {
+            splitted_vector.push_back(current_vector);
+            current_vector.clear();
+        } else {
+            current_vector.push_back(item);
+        }
+    }
+    splitted_vector.push_back(current_vector);
+
+    return splitted_vector;
+}

@@ -4,9 +4,11 @@
 #include <fmt/core.h>
 #include <fmt/format.h>
 #include <string>
+#include <sys/types.h>
 #include <unistd.h>
 #include <vector>
 #include <sys/wait.h>
+#include <algorithm>
 
 #include "context.h"
 #include "../utils/utils.h"
@@ -18,7 +20,7 @@
 using namespace std;
 using namespace fmt;
 
-void run_command(const vector<string> &command_parts, string command) {
+void run_single_command(const vector<string> &command_parts, const string &command) {
     pid_t pid = fork();
     if (pid == 0) {
         vector<char*> argv;
@@ -40,6 +42,77 @@ void run_command(const vector<string> &command_parts, string command) {
         }
     } else {
         perror("fork failed");
+    }
+}
+
+void run_piped_command(const vector<vector<string>> &commands) {
+    vector<char*> argv1;
+    for (const string &s : commands[0]) {
+        argv1.push_back(const_cast<char*>(s.c_str()));
+    }
+    argv1.push_back(nullptr);
+
+    vector<char*> argv2;
+    for (const string &s : commands[1]) {
+        argv2.push_back(const_cast<char*>(s.c_str()));
+    }
+    argv2.push_back(nullptr);
+
+    int pipedes[2];
+    if (pipe(pipedes) != 0) {
+        perror("failed to set up pipe");
+        return;
+    }
+
+    pid_t pid1 = fork();
+    if (pid1 == 0) {
+        dup2(pipedes[1], STDOUT_FILENO);
+        close(pipedes[0]);
+        close(pipedes[1]);
+
+        execvp(argv1[0], argv1.data());
+
+        string error_msg = ("failed to execute");
+        perror(error_msg.c_str());
+        exit(1);
+    } else if (pid1 > 0) {
+        pid_t pid2 = fork();
+        if (pid2 == 0) {
+            dup2(pipedes[0], STDIN_FILENO);
+            close(pipedes[0]);
+            close(pipedes[1]);
+
+            execvp(argv2[0], argv2.data());
+
+            string error_msg = ("failed to execute");
+            perror(error_msg.c_str());
+            exit(1);
+        } else if (pid2 > 0) {
+            int status1 = 0;
+            int status2 = 0;
+            close(pipedes[0]);
+            close(pipedes[1]);
+            waitpid(pid1, &status1, 0);
+            waitpid(pid2, &status2, 0);
+            if (status1 != 0) {
+                last_exit_code = status1;
+            } else {
+                last_exit_code = status2;
+            }
+        }
+    }
+}
+
+void run_command(const vector<string> &command_parts, const string &command) {
+    if (find(command_parts.begin(), command_parts.end(), "|") != command_parts.end()) {
+        vector<vector<string>> splitted_vector = split_vector(command_parts, "|");
+        if (splitted_vector.size() > 2) {
+            println("support for multiple pipes is not yet implemented");
+            return;
+        }
+        run_piped_command(splitted_vector);
+    } else {
+        run_single_command(command_parts, command);
     }
 }
 
