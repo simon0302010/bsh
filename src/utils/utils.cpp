@@ -124,7 +124,7 @@ string get_exit_code_string() {
     return "";
 }
 
-vector<vector<string>> split_vector(const vector<string> items, string splitter) {
+vector<vector<string>> split_vector(const vector<string> &items, const string &splitter) {
     vector<vector<string>> splitted_vector;
     vector<string> current_vector;
     for (string item : items) {
@@ -138,4 +138,13 @@ vector<vector<string>> split_vector(const vector<string> items, string splitter)
     splitted_vector.push_back(current_vector);
 
     return splitted_vector;
+}
+
+vector<char*> into_c_vec(const vector<string> &input) {
+    vector<char*> output;
+    for (const string &s : input) {
+        output.push_back(const_cast<char*>(s.c_str()));
+    }
+    output.push_back(nullptr);
+    return output;
 }

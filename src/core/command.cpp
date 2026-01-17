@@ -1,8 +1,10 @@
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <fmt/base.h>
 #include <fmt/core.h>
 #include <fmt/format.h>
+#include <numeric>
 #include <string>
 #include <sys/types.h>
 #include <unistd.h>
@@ -46,58 +48,56 @@ void run_single_command(const vector<string> &command_parts, const string &comma
 }
 
 void run_piped_command(const vector<vector<string>> &commands) {
-    vector<char*> argv1;
-    for (const string &s : commands[0]) {
-        argv1.push_back(const_cast<char*>(s.c_str()));
+    vector<vector<char*>> commands_c;
+    for (const vector<string> &command : commands) {
+        commands_c.push_back(into_c_vec(command));
     }
-    argv1.push_back(nullptr);
+    int num_commands = commands.size();
 
-    vector<char*> argv2;
-    for (const string &s : commands[1]) {
-        argv2.push_back(const_cast<char*>(s.c_str()));
-    }
-    argv2.push_back(nullptr);
-
-    int pipedes[2];
-    if (pipe(pipedes) != 0) {
-        perror("failed to set up pipe");
-        return;
+    vector<array<int, 2>> pipes(num_commands - 1);
+    for (int i = 0; i < num_commands - 1; i++) {
+        pipe(pipes[i].data());
     }
 
-    pid_t pid1 = fork();
-    if (pid1 == 0) {
-        dup2(pipedes[1], STDOUT_FILENO);
-        close(pipedes[0]);
-        close(pipedes[1]);
+    vector<pid_t> pids(num_commands);
 
-        execvp(argv1[0], argv1.data());
+    for (int i = 0; i < num_commands; i++) {
+        pids[i] = fork();
 
-        string error_msg = ("failed to execute");
-        perror(error_msg.c_str());
-        exit(1);
-    } else if (pid1 > 0) {
-        pid_t pid2 = fork();
-        if (pid2 == 0) {
-            dup2(pipedes[0], STDIN_FILENO);
-            close(pipedes[0]);
-            close(pipedes[1]);
+        if (pids[i] == 0) {
+            if (i > 0) {
+                dup2(pipes[i-1][0], STDIN_FILENO);
+            }
 
-            execvp(argv2[0], argv2.data());
+            if (i < num_commands - 1) {
+                dup2(pipes[i][1], STDOUT_FILENO);
+            }
 
-            string error_msg = ("failed to execute");
+            for (int j = 0; j < num_commands - 1; j++) {
+                close(pipes[j][0]);
+                close(pipes[j][1]);
+            }
+
+            execvp(commands_c[i][0], commands_c[i].data());
+            string error_msg = ("failed to execute \"" + commands[i][0] + "\"");
             perror(error_msg.c_str());
             exit(1);
-        } else if (pid2 > 0) {
-            int status1 = 0;
-            int status2 = 0;
-            close(pipedes[0]);
-            close(pipedes[1]);
-            waitpid(pid1, &status1, 0);
-            waitpid(pid2, &status2, 0);
-            if (status1 != 0) {
-                last_exit_code = status1;
-            } else {
-                last_exit_code = status2;
+        }
+    }
+
+    for (int i = 0; i < num_commands - 1; i++) {
+        close(pipes[i][0]);
+        close(pipes[i][1]);
+    }
+
+    int status;
+    bool exit_code_set = false;
+    for (int i = 0; i < num_commands; i++) {
+        waitpid(pids[i], &status, 0);
+        if (!exit_code_set && status != 0) {
+            if (WIFEXITED(status)) {
+                last_exit_code = WEXITSTATUS(status);
+                exit_code_set = true;
             }
         }
     }
@@ -106,10 +106,6 @@ void run_piped_command(const vector<vector<string>> &commands) {
 void run_command(const vector<string> &command_parts, const string &command) {
     if (find(command_parts.begin(), command_parts.end(), "|") != command_parts.end()) {
         vector<vector<string>> splitted_vector = split_vector(command_parts, "|");
-        if (splitted_vector.size() > 2) {
-            println("support for multiple pipes is not yet implemented");
-            return;
-        }
         run_piped_command(splitted_vector);
     } else {
         run_single_command(command_parts, command);

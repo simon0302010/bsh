@@ -34,6 +34,14 @@ void sigint_handler(int s) {
     rl_redisplay();
 }
 
+string get_prompt_symbol() {
+    if (geteuid() == 0) {
+        return " # ";
+    } else {
+        return " $ ";
+    }
+}
+
 int main() {
     // signal handler
     struct sigaction sigIntHandler;
@@ -77,7 +85,7 @@ int main() {
     rl_bind_keyseq("\033[B", arrow_down);
 
     while (true) {
-        string prompt = username + "@" + hostname + ":" + replace_all(bsh_context.current_dir, homedir, "~") + get_exit_code_string() + " $ ";
+        string prompt = username + "@" + hostname + ":" + replace_all(bsh_context.current_dir, homedir, "~") + get_exit_code_string() + get_prompt_symbol();
         const char* command = readline(prompt.c_str());
         if (command == nullptr) {
             break;
