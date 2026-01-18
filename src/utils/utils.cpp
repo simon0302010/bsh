@@ -63,21 +63,19 @@ vector<string> split_command(const string &command) {
             continue;
         }
 
-        if (is_command_operator(c) && !(in_double_quotes || in_single_quotes)) {
-            if (!arg.empty()) {
-                args.push_back(arg);
-                args.push_back(string(1, c));
-            }
-            arg.clear();
-        }
-
         if (in_double_quotes || in_single_quotes) {
             arg.push_back(c);
+        } else if (is_command_operator(c)) {
+            if (!arg.empty()) {
+                args.push_back(arg);
+                arg.clear();
+            }
+            args.push_back(string(1, c));
         } else if (c == ' ') {
             if (!arg.empty()) {
                 args.push_back(arg);
+                arg.clear();
             }
-            arg.clear();
         } else {
             arg.push_back(c);
         }

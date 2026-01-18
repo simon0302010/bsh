@@ -35,7 +35,7 @@ struct Cmd {
     string stdin_stream;
     WriterProperties stdout_stream;
     WriterProperties stderr_stream;
-    vector<char*> args;
+    vector<string> args;
 };
 
 optional<vector<Cmd>> parse_redirection(const vector<vector<string>> &command_parts) {
@@ -80,7 +80,7 @@ optional<vector<Cmd>> parse_redirection(const vector<vector<string>> &command_pa
                 cmd.stderr_stream = {command[i + 1], FileMode::Append};
                 i += 2;
             } else {
-                cmd.args.push_back(const_cast<char*>(command[i].c_str()));
+                cmd.args.push_back(command[i]);
                 i += 1;
             }
         }
@@ -131,8 +131,14 @@ void run_command(const vector<string> &command_parts, const string &command) {
                 close(pipes[j][1]);
             }
 
-            execvp(commands[i].args[0], commands[i].args.data());
-            string error_msg = ("failed to execute \"" + string(commands[i].args[0]) + "\"");
+            vector<char*> c_args;
+            for (const string &s : commands[i].args) {
+                c_args.push_back(const_cast<char*>(s.c_str()));
+            }
+            c_args.push_back(nullptr);
+
+            execvp(c_args[0], c_args.data());
+            string error_msg = ("failed to execute \"" + commands[i].args[0] + "\"");
             perror(error_msg.c_str());
             exit(1);
         } else if (pids[i] < 0) {
