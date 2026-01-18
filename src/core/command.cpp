@@ -10,7 +10,6 @@
 #include <unistd.h>
 #include <vector>
 #include <sys/wait.h>
-#include <algorithm>
 
 #include "context.h"
 #include "../utils/utils.h"
@@ -36,7 +35,7 @@ struct Cmd {
     string stdin_stream;
     WriterProperties stdout_stream;
     WriterProperties stderr_stream;
-    vector<string> args;
+    vector<char*> args;
 };
 
 optional<vector<Cmd>> parse_redirection(const vector<vector<string>> &command_parts) {
@@ -81,7 +80,7 @@ optional<vector<Cmd>> parse_redirection(const vector<vector<string>> &command_pa
                 cmd.stderr_stream = {command[i + 1], FileMode::Append};
                 i += 2;
             } else {
-                cmd.args.push_back(command[i]);
+                cmd.args.push_back(const_cast<char*>(command[i].c_str()));
                 i += 1;
             }
         }
@@ -98,11 +97,14 @@ optional<vector<Cmd>> parse_redirection(const vector<vector<string>> &command_pa
 }
 
 void run_command(const vector<string> &command_parts, const string &command) {
-    vector<vector<string>> commands = split_vector(command_parts, "|");
-    vector<vector<char*>> commands_c;
-    for (const vector<string> &command : commands) {
-        commands_c.push_back(into_c_vec(command));
-    }  
+    vector<vector<string>> commands_pipes = split_vector(command_parts, "|");
+    optional<vector<Cmd>> optional_commands = parse_redirection(commands_pipes);
+    if (!optional_commands) {
+        last_exit_code = 1;
+        return;
+    }
+    vector<Cmd> commands = *optional_commands;
+
     int num_commands = commands.size();
 
     vector<array<int, 2>> pipes(num_commands - 1);
@@ -129,8 +131,8 @@ void run_command(const vector<string> &command_parts, const string &command) {
                 close(pipes[j][1]);
             }
 
-            execvp(commands_c[i][0], commands_c[i].data());
-            string error_msg = ("failed to execute \"" + commands[i][0] + "\"");
+            execvp(commands[i].args[0], commands[i].args.data());
+            string error_msg = ("failed to execute \"" + string(commands[i].args[0]) + "\"");
             perror(error_msg.c_str());
             exit(1);
         } else if (pids[i] < 0) {

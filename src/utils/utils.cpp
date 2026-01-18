@@ -13,6 +13,7 @@
 using namespace std;
 
 regex env_var_pattern(R"(\$\{[A-Za-z_][A-Za-z0-9_]*\}|\$[A-Za-z_][A-Za-z0-9_]*)");
+const char* OPERATORS[] = {"|", ">", "<", ">>", "2>", "2>>"};
 
 string replace_all(string s, const string& target, const string& replacement) {
     size_t pos = 0;
@@ -35,6 +36,15 @@ vector<string> expand_home(const vector<string> &args, const string &home) {
     return new_args;
 }
 
+bool is_command_operator(const char &c) {
+    for (const char* op : OPERATORS) {
+        if (*op == c) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /// Splits a command up into a vec<string>
 vector<string> split_command(const string &command) {
     vector<string> args;
@@ -51,6 +61,14 @@ vector<string> split_command(const string &command) {
         } else if (c == '\'' && !in_double_quotes) {
             in_single_quotes = !in_single_quotes;
             continue;
+        }
+
+        if (is_command_operator(c) && !(in_double_quotes || in_single_quotes)) {
+            if (!arg.empty()) {
+                args.push_back(arg);
+                args.push_back(string(1, c));
+            }
+            arg.clear();
         }
 
         if (in_double_quotes || in_single_quotes) {
@@ -147,4 +165,27 @@ vector<char*> into_c_vec(const vector<string> &input) {
     }
     output.push_back(nullptr);
     return output;
+}
+
+vector<vector<string>> split_vector_deeper(const vector<string> &items, const char &splitter) {
+    vector<vector<string>> splitted_vector;
+    vector<string> current_vector;
+    string current_string;
+    
+    for (string item : items) {
+        for (char current_char : item) {
+            if (current_char == splitter) {
+                current_vector.push_back(current_string);
+                splitted_vector.push_back(current_vector);
+                current_string.clear();
+                current_vector.clear();
+            } else {
+                current_string.push_back(current_char);
+            }
+        }
+        current_vector.push_back(current_string);
+        current_string.clear();
+    }
+    
+    return splitted_vector;
 }
