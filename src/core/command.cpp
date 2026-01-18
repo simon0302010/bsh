@@ -97,36 +97,12 @@ optional<vector<Cmd>> parse_redirection(const vector<vector<string>> &command_pa
     return commands;
 }
 
-void run_single_command(const vector<string> &command_parts, const string &command) {
-    pid_t pid = fork();
-    if (pid == 0) {
-        vector<char*> argv;
-        for (const string &s : command_parts) {
-            argv.push_back(const_cast<char*>(s.c_str()));
-        }
-        argv.push_back(nullptr);
-
-        execvp(argv[0], argv.data());
-
-        string error_msg = ("failed to execute \"" + command + "\"");
-        perror(error_msg.c_str());
-        exit(1);
-    } else if (pid != 0) {
-        int status = 0;
-        waitpid(pid, &status, 0);
-        if (WIFEXITED(status)) {
-            last_exit_code = WEXITSTATUS(status);
-        }
-    } else {
-        perror("fork failed");
-    }
-}
-
-void run_piped_command(const vector<vector<string>> &commands) {
+void run_command(const vector<string> &command_parts, const string &command) {
+    vector<vector<string>> commands = split_vector(command_parts, "|");
     vector<vector<char*>> commands_c;
     for (const vector<string> &command : commands) {
         commands_c.push_back(into_c_vec(command));
-    }
+    }  
     int num_commands = commands.size();
 
     vector<array<int, 2>> pipes(num_commands - 1);
@@ -157,6 +133,8 @@ void run_piped_command(const vector<vector<string>> &commands) {
             string error_msg = ("failed to execute \"" + commands[i][0] + "\"");
             perror(error_msg.c_str());
             exit(1);
+        } else if (pids[i] < 0) {
+            perror("fork failed");
         }
     }
 
@@ -176,14 +154,9 @@ void run_piped_command(const vector<vector<string>> &commands) {
             }
         }
     }
-}
 
-void run_command(const vector<string> &command_parts, const string &command) {
-    if (find(command_parts.begin(), command_parts.end(), "|") != command_parts.end()) {
-        vector<vector<string>> splitted_vector = split_vector(command_parts, "|");
-        run_piped_command(splitted_vector);
-    } else {
-        run_single_command(command_parts, command);
+    if (!exit_code_set) {
+        last_exit_code = 0;
     }
 }
 
