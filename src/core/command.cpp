@@ -4,7 +4,7 @@
 #include <fmt/base.h>
 #include <fmt/core.h>
 #include <fmt/format.h>
-#include <numeric>
+#include <optional>
 #include <string>
 #include <sys/types.h>
 #include <unistd.h>
@@ -21,6 +21,81 @@
 
 using namespace std;
 using namespace fmt;
+
+enum class FileMode {
+    Overwrite,
+    Append
+};
+
+struct WriterProperties {
+    string file;
+    FileMode mode;
+};
+
+struct Cmd {
+    string stdin_stream;
+    WriterProperties stdout_stream;
+    WriterProperties stderr_stream;
+    vector<string> args;
+};
+
+optional<vector<Cmd>> parse_redirection(const vector<vector<string>> &command_parts) {
+    vector<Cmd> commands;
+    for (const vector<string> &command : command_parts) {
+        Cmd cmd;
+        int i = 0;
+        while (i < command.size()) {
+            if (command[i] == "<") {
+                if (i + 1 >= command.size()) {
+                    println("missing file after <");
+                    return nullopt;
+                }
+                cmd.stdin_stream = command[i + 1];
+                i += 2;
+            } else if (command[i] == ">") {
+                if (i + 1 >= command.size()) {
+                    println("missing file after >");
+                    return nullopt;
+                }
+                cmd.stdout_stream = {command[i + 1], FileMode::Overwrite};
+                i += 2;
+            } else if (command[i] == ">>") {
+                if (i + 1 >= command.size()) {
+                    println("missing file after >>");
+                    return nullopt;
+                }
+                cmd.stdout_stream = {command[i + 1], FileMode::Append};
+                i += 2;
+            } else if (command[i] == "2>") {
+                if (i + 1 >= command.size()) {
+                    println("missing file after 2>");
+                    return nullopt;
+                }
+                cmd.stderr_stream = {command[i + 1], FileMode::Overwrite};
+                i += 2;
+            } else if (command[i] == "2>>") {
+                if (i + 1 >= command.size()) {
+                    println("missing file after 2>>");
+                    return nullopt;
+                }
+                cmd.stderr_stream = {command[i + 1], FileMode::Append};
+                i += 2;
+            } else {
+                cmd.args.push_back(command[i]);
+                i += 1;
+            }
+        }
+
+        if (cmd.args.empty()) {
+            println("empty command");
+            return nullopt;
+        }
+
+        commands.push_back(cmd);
+    }
+
+    return commands;
+}
 
 void run_single_command(const vector<string> &command_parts, const string &command) {
     pid_t pid = fork();
