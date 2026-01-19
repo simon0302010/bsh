@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <vector>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 #include "context.h"
 #include "../utils/utils.h"
@@ -32,12 +33,13 @@ struct WriterProperties {
 };
 
 struct Cmd {
-    string stdin_stream;
-    WriterProperties stdout_stream;
-    WriterProperties stderr_stream;
+    optional<string> stdin_stream = nullopt;
+    optional<WriterProperties> stdout_stream = nullopt;
+    optional<WriterProperties> stderr_stream = nullopt;
     vector<string> args;
 };
 
+// TODO: better parsing
 optional<vector<Cmd>> parse_redirection(const vector<vector<string>> &command_parts) {
     vector<Cmd> commands;
     for (const vector<string> &command : command_parts) {
@@ -118,12 +120,23 @@ void run_command(const vector<string> &command_parts, const string &command) {
         pids[i] = fork();
 
         if (pids[i] == 0) {
-            if (i > 0) {
-                dup2(pipes[i-1][0], STDIN_FILENO);
+            if (commands[i].stdout_stream) {
+                int flags = (commands[i].stdout_stream->mode == FileMode::Overwrite) ? O_WRONLY | O_CREAT | O_TRUNC : O_WRONLY | O_CREAT | O_APPEND;
+                int filefd = open(commands[i].stdout_stream->file.c_str(), flags, 0644);
+                if (filefd < 0) {
+                    string error_msg = "failed to open " + commands[i].stdout_stream->file;
+                    perror(error_msg.c_str());
+                    exit(1);
+                }
+                dup2(filefd, STDOUT_FILENO);
+                close(filefd);
             }
-
             if (i < num_commands - 1) {
                 dup2(pipes[i][1], STDOUT_FILENO);
+            }
+
+            if (i > 0) {
+                dup2(pipes[i-1][0], STDIN_FILENO);
             }
 
             for (int j = 0; j < num_commands - 1; j++) {
