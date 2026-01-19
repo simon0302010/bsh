@@ -32,6 +32,7 @@ void sigint_handler(int s) {
     fmt::print("\n");
     rl_on_new_line();
     rl_redisplay();
+    history_idx = -1;
 }
 
 string get_prompt_symbol() {
