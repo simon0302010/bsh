@@ -130,8 +130,7 @@ void run_command(const vector<string> &command_parts, const string &command) {
                 }
                 dup2(filefd, STDOUT_FILENO);
                 close(filefd);
-            }
-            if (i < num_commands - 1) {
+            } else if (i < num_commands - 1) { // else if until fix is found and output can be streamed twice
                 dup2(pipes[i][1], STDOUT_FILENO);
             }
 
