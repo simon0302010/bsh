@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <fmt/base.h>
 #include <fmt/format.h>
 #include <string>
 #include <vector>
@@ -45,6 +46,26 @@ bool is_command_operator(const char &c) {
     return false;
 }
 
+// Returns operator length. 0 if it's not one.
+int get_operator_length(const string &command, size_t i) {
+    if (i >= command.size()) {
+        return 0;
+    }
+    
+    for (int len = 3; len >= 1; len--) {
+        if (i + len <= command.size()) {
+            string candidate = command.substr(i, len);
+            for (const char* op : OPERATORS) {
+                if (candidate == op) {
+                    return len;
+                }
+            }
+        }
+    }
+    
+    return 0;
+}
+
 /// Splits a command up into a vec<string>
 vector<string> split_command(const string &command) {
     vector<string> args;
@@ -65,19 +86,23 @@ vector<string> split_command(const string &command) {
 
         if (in_double_quotes || in_single_quotes) {
             arg.push_back(c);
-        } else if (is_command_operator(c)) {
-            if (!arg.empty()) {
-                args.push_back(arg);
-                arg.clear();
-            }
-            args.push_back(string(1, c));
-        } else if (c == ' ') {
-            if (!arg.empty()) {
-                args.push_back(arg);
-                arg.clear();
-            }
         } else {
-            arg.push_back(c);
+            int op_len = get_operator_length(command, i);
+            if (op_len > 0) {
+                if (!arg.empty()) {
+                    args.push_back(arg);
+                    arg.clear();
+                }
+                args.push_back(command.substr(i, op_len));
+                i += op_len - 1;
+            } else if (c == ' ') {
+                if (!arg.empty()) {
+                    args.push_back(arg);
+                    arg.clear();
+                }
+            } else {
+                arg.push_back(c);
+            }
         }
     }
     if (!arg.empty()) {
