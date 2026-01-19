@@ -100,6 +100,7 @@ optional<vector<Cmd>> parse_redirection(const vector<vector<string>> &command_pa
 
 void run_command(const vector<string> &command_parts, const string &command) {
     vector<vector<string>> commands_pipes = split_vector(command_parts, "|");
+
     optional<vector<Cmd>> optional_commands = parse_redirection(commands_pipes);
     if (!optional_commands) {
         last_exit_code = 1;
@@ -120,8 +121,11 @@ void run_command(const vector<string> &command_parts, const string &command) {
         pids[i] = fork();
 
         if (pids[i] == 0) {
+            // stdout into file or pipe
             if (commands[i].stdout_stream) {
-                int flags = (commands[i].stdout_stream->mode == FileMode::Overwrite) ? O_WRONLY | O_CREAT | O_TRUNC : O_WRONLY | O_CREAT | O_APPEND;
+                int flags = (commands[i].stdout_stream->mode == FileMode::Overwrite) 
+                    ? O_WRONLY | O_CREAT | O_TRUNC 
+                    : O_WRONLY | O_CREAT | O_APPEND;
                 int filefd = open(commands[i].stdout_stream->file.c_str(), flags, 0644);
                 if (filefd < 0) {
                     string error_msg = "failed to open " + commands[i].stdout_stream->file;
@@ -130,12 +134,37 @@ void run_command(const vector<string> &command_parts, const string &command) {
                 }
                 dup2(filefd, STDOUT_FILENO);
                 close(filefd);
-            } else if (i < num_commands - 1) { // else if until fix is found and output can be streamed twice
+            } else if (i < num_commands - 1) {
                 dup2(pipes[i][1], STDOUT_FILENO);
             }
 
-            if (i > 0) {
+            // stdin into file or pipe
+            if (commands[i].stdin_stream) {
+                int filefd = open(commands[i].stdin_stream->c_str(), O_RDONLY);
+                if (filefd < 0) {
+                    string error_msg = "failed to open " + *commands[i].stdin_stream;
+                    perror(error_msg.c_str());
+                    exit(1);
+                }
+                dup2(filefd, STDIN_FILENO);
+                close(filefd);
+            } else if (i > 0) {
                 dup2(pipes[i-1][0], STDIN_FILENO);
+            }
+
+            // stderr into file
+            if (commands[i].stderr_stream) {
+                int flags = (commands[i].stderr_stream->mode == FileMode::Overwrite) 
+                    ? O_WRONLY | O_CREAT | O_TRUNC 
+                    : O_WRONLY | O_CREAT | O_APPEND;
+                int filefd = open(commands[i].stderr_stream->file.c_str(), flags, 0644);
+                if (filefd < 0) {
+                    string error_msg = "failed to open " + commands[i].stderr_stream->file;
+                    perror(error_msg.c_str());
+                    exit(1);
+                }
+                dup2(filefd, STDERR_FILENO);
+                close(filefd);
             }
 
             for (int j = 0; j < num_commands - 1; j++) {

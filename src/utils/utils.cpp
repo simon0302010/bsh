@@ -108,7 +108,7 @@ vector<string> split_command(const string &command) {
     if (!arg.empty()) {
         args.push_back(arg);
     }
-
+    
     return args;
 }
 
