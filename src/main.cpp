@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fmt/base.h>
+#include <fmt/format.h>
 #include <linux/limits.h>
 #include <readline/rltypedefs.h>
 #include <signal.h>
@@ -37,9 +38,9 @@ void sigint_handler(int s) {
 
 string get_prompt_symbol() {
     if (geteuid() == 0) {
-        return " # ";
+        return "#";
     } else {
-        return " $ ";
+        return "$";
     }
 }
 
@@ -86,7 +87,7 @@ int main() {
     rl_bind_keyseq("\033[B", arrow_down);
 
     while (true) {
-        string prompt = username + "@" + hostname + ":" + replace_all(bsh_context.current_dir, homedir, "~") + get_exit_code_string() + get_prompt_symbol();
+        string prompt = fmt::format("\033[34m{}@{}:\033[36m{}\033[33m{} \033[1m\033[92m{}\033[0m ", username, hostname, replace_all(bsh_context.current_dir, homedir, "~"), get_exit_code_string(), get_prompt_symbol());
         const char* command = readline(prompt.c_str());
         if (command == nullptr) {
             break;

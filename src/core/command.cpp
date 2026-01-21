@@ -121,6 +121,14 @@ void run_command(const vector<string> &command_parts, const string &command) {
         pids[i] = fork();
 
         if (pids[i] == 0) {
+            // warnings
+            if (commands[i].stdout_stream && i < num_commands - 1) {
+                println("warning: stdout to file takes priority over piped stdout");
+            }
+            if (commands[i].stdin_stream && i > 0) {
+                println("stdin from file takes priority over stdin from pipe");
+            }
+
             // stdout into file or pipe
             if (commands[i].stdout_stream) {
                 int flags = (commands[i].stdout_stream->mode == FileMode::Overwrite) 
