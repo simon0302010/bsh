@@ -86,23 +86,29 @@ int main() {
     rl_bind_keyseq("\033[A", arrow_up);
     rl_bind_keyseq("\033[B", arrow_down);
 
-    while (true) {
+    bool running = true;
+    while (running) {
         string prompt = fmt::format("\033[34m{}@{}:\033[36m{}\033[33m{} \033[1m\033[92m{}\033[0m ", username, hostname, replace_all(bsh_context.current_dir, homedir, "~"), get_exit_code_string(), get_prompt_symbol());
-        const char* command = readline(prompt.c_str());
-        if (command == nullptr) {
+        const char* input_c = readline(prompt.c_str());
+        if (input_c == nullptr) {
             break;
         }
-        bsh_context.command = string(command);
-        if (bsh_context.command.empty()) {
-            continue;
+
+        string input = string(input_c);
+        for (const string &command : split_string(input, '\n')) {
+            bsh_context.command = command;
+            if (bsh_context.command.empty()) {
+                continue;
+            }
+            history.push_back(command);
+            history_file << command << endl;
+            if (!handle_command(bsh_context)) {
+                running = false;
+            }
         }
-        history.push_back(command);
-        history_file << command << endl;
+
         history_idx = -1;
         saved_line.clear();
-        if (!handle_command(bsh_context)) {
-            break;
-        }
 
         if (clear_history_file) {
             history.clear();

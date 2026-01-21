@@ -109,6 +109,13 @@ vector<string> split_command(const string &command) {
         args.push_back(arg);
     }
     
+    /*
+    Can be used for debugging
+    for (const string &arg : args) {
+        fmt::println("{}", arg);
+    }
+    */
+
     return args;
 }
 
@@ -211,4 +218,20 @@ vector<vector<string>> split_vector_deeper(const vector<string> &items, const ch
     }
     
     return splitted_vector;
+}
+
+vector<string> split_string(const string &s, const char &splitter) {
+    vector<string> splitted_string;
+    string current_string;
+    for (const char &c : s) {
+        if (c == splitter) {
+            splitted_string.push_back(current_string);
+            current_string.clear();
+        } else {
+            current_string.push_back(c);
+        }
+    }
+    splitted_string.push_back(current_string);
+
+    return splitted_string;
 }
