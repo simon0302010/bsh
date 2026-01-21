@@ -220,15 +220,21 @@ vector<vector<string>> split_vector_deeper(const vector<string> &items, const ch
     return splitted_vector;
 }
 
-vector<string> split_string(const string &s, const char &splitter) {
+vector<string> prepare_input(const string &s) {
     vector<string> splitted_string;
     string current_string;
-    for (const char &c : s) {
-        if (c == splitter) {
+    int i = 0;
+    while (i < s.size()) {
+        if (s[i] == '\\' && i + 1 < s.size() && s[i + 1] == '\n') {
+            i += 2;
+        }
+        else if (s[i] == '\n') {
             splitted_string.push_back(current_string);
             current_string.clear();
+            i++;
         } else {
-            current_string.push_back(c);
+            current_string.push_back(s[i]);
+            i++;
         }
     }
     splitted_string.push_back(current_string);

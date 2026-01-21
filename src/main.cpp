@@ -95,7 +95,7 @@ int main() {
         }
 
         string input = string(input_c);
-        for (const string &command : split_string(input, '\n')) {
+        for (const string &command : prepare_input(input)) {
             bsh_context.command = command;
             if (bsh_context.command.empty()) {
                 continue;
