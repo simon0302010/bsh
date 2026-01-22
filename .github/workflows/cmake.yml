@@ -30,8 +30,7 @@ jobs:
           sudo apt install -y \
             build-essential \
             cmake \
-            libreadline-dev \
-            libfmt-dev
+            libreadline-dev
 
       - name: Configure CMake
         run: |
