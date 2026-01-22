@@ -9,7 +9,6 @@
 #include <linux/limits.h>
 #include <readline/rltypedefs.h>
 #include <signal.h>
-#include <stdexcept>
 #include <string>
 #include <fmt/core.h>
 #include <unistd.h>
