@@ -8,7 +8,7 @@ Bsh (short for bad shell) is a simple shell made by me in C++. It supports basic
 - A few built-in commands
 - Piping – Commands can be piped into each other by using |
 - stdout/stderr/stdin redirection using > >> 2> 2>> <
-- Env variable expansion – $VAR or ${VAR} will be expanded
+- Env variable expansion – `$VAR` or `${VAR}` will be expanded
 - Script execution – Put a few commands into a file and run it
 - Colored prompt – Nothing more to say about that
 - Command history – Lets you run commands from your history (also some other stuff but not enough space)
