@@ -18,3 +18,7 @@ target_link_libraries(bsh PRIVATE
     readline
 )
 target_include_directories(bsh PRIVATE src)
+
+install(TARGETS bsh
+    RUNTIME DESTINATION bin
+)
