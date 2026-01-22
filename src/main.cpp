@@ -37,10 +37,15 @@ void sigint_handler(int s) {
 }
 
 string get_prompt_symbol() {
+    string symbol = "$";
     if (geteuid() == 0) {
-        return "#";
+       symbol = "#";
+    }
+
+    if (last_exit_code != 0){
+        return fmt::format("\033[1m\033[91m{}\033[0m", symbol);
     } else {
-        return "$";
+        return fmt::format("\033[1m\033[92m{}\033[0m", symbol);
     }
 }
 
@@ -88,7 +93,7 @@ int main() {
 
     bool running = true;
     while (running) {
-        string prompt = fmt::format("\033[34m{}@{}:\033[36m{}\033[33m{} \033[1m\033[92m{}\033[0m ", username, hostname, replace_all(bsh_context.current_dir, homedir, "~"), get_exit_code_string(), get_prompt_symbol());
+        string prompt = fmt::format("\033[34m{}@{}:\033[36m{}\033[33m{} {} ", username, hostname, replace_all(bsh_context.current_dir, homedir, "~"), get_exit_code_string(), get_prompt_symbol());
         const char* input_c = readline(prompt.c_str());
         if (input_c == nullptr) {
             break;
