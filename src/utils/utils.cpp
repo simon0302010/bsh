@@ -223,17 +223,28 @@ vector<vector<string>> split_vector_deeper(const vector<string> &items, const ch
 vector<string> prepare_input(const string &s) {
     vector<string> splitted_string;
     string current_string;
+
+    bool in_single_quotes = false;
+    bool in_double_quotes = false;
+
     int i = 0;
     while (i < s.size()) {
-        if (s[i] == '\\' && i + 1 < s.size() && s[i + 1] == '\n') {
-            i += 2;
+        char c = s[i];
+
+        if (c == '\'') {
+            in_single_quotes = !in_single_quotes;
+        } else if (c == '"') {
+            in_double_quotes = !in_double_quotes;
         }
-        else if (s[i] == '\n') {
+
+        if (c == '\\' && i + 1 < s.size() && s[i + 1] == '\n') {
+            i += 2;
+        } else if ((c == '\n' || c == ';') && !(in_single_quotes || in_double_quotes)) {
             splitted_string.push_back(current_string);
             current_string.clear();
             i++;
         } else {
-            current_string.push_back(s[i]);
+            current_string.push_back(c);
             i++;
         }
     }
