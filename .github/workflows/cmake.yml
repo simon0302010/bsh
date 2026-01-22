@@ -23,6 +23,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            build-essential \
+            cmake \
+            readline \
+            fmt
 
       - name: Configure CMake
         run: |
