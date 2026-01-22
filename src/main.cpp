@@ -5,9 +5,11 @@
 #include <cstring>
 #include <fmt/base.h>
 #include <fmt/format.h>
+#include <iterator>
 #include <linux/limits.h>
 #include <readline/rltypedefs.h>
 #include <signal.h>
+#include <stdexcept>
 #include <string>
 #include <fmt/core.h>
 #include <unistd.h>
@@ -49,7 +51,51 @@ string get_prompt_symbol() {
     }
 }
 
-int main() {
+string read_file(const string &path) {
+    ifstream file(path, ios::binary);
+    if (!file) {
+        fmt::println("bsh: file not found: {}", path);
+        exit(2);
+    }
+
+    return string(
+        (istreambuf_iterator<char>(file)),
+        istreambuf_iterator<char>()
+    );
+}
+
+int run_from_file(string file) {
+    BshContext bsh_context;
+
+    char cwd[PATH_MAX];
+    if (strcmp(getcwd(cwd, PATH_MAX - 1), "Success") == 0) {
+        perror("getcwd failed");
+        return 1;
+    } else {
+        bsh_context.current_dir = string(cwd);
+    }
+
+    string file_contents = read_file(file);
+
+    for (const string &command : prepare_input(file_contents)) {
+        bsh_context.command = command;
+        if (bsh_context.command.empty()) {
+            continue;
+        }
+        if (!handle_command(bsh_context)) {
+            return 0;
+        }
+    }
+
+    return last_exit_code;
+}
+
+int main(int argc, char* argv[]) {
+    // running script
+    if (argc > 1) {
+        return run_from_file(string(argv[1]));
+    }
+
     // signal handler
     struct sigaction sigIntHandler;
 
