@@ -66,6 +66,8 @@ int get_operator_length(const string &command, size_t i) {
     return 0;
 }
 
+
+
 /// Splits a command up into a vec<string>
 vector<string> split_command(const string &command) {
     vector<string> args;
@@ -95,6 +97,13 @@ vector<string> split_command(const string &command) {
                 }
                 args.push_back(command.substr(i, op_len));
                 i += op_len - 1;
+            } else if (c == '\\') {
+                if (i + 1 < command.size()) {
+                    arg.push_back(command[i + 1]);
+                    i++;
+                } else {
+                    arg.push_back(c);
+                }
             } else if (c == ' ') {
                 if (!arg.empty()) {
                     args.push_back(arg);
@@ -114,12 +123,10 @@ vector<string> split_command(const string &command) {
         args.push_back(arg);
     }
     
-    /*
-    Can be used for debugging
+    /*fmt::println("Split command:");
     for (const string &arg : args) {
         fmt::println("{}", arg);
-    }
-    */
+    }*/
 
     return args;
 }
@@ -254,6 +261,11 @@ vector<string> prepare_input(const string &s) {
         }
     }
     splitted_string.push_back(current_string);
+
+    /*fmt::println("Splitted:");
+    for (const string &s : splitted_string) {
+        fmt::println("{}", s);
+    }*/
 
     return splitted_string;
 }
