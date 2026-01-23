@@ -38,16 +38,20 @@ CursorPos get_cursor() {
 }
 
 void set_cursor(CursorPos pos) {
-    printf("\033[%d;%dR", pos.row, pos.col);
+    printf("\033[%d;%dH", pos.row, pos.col);
+    fflush(stdout);
 }
 
 void reset_readline() {
+    rl_replace_line("", 0);
+    rl_point = 0;
+    rl_redisplay();
+    
     printf("\r");
     printf("\0337");
     printf("\033[J");
     fflush(stdout);
-    rl_replace_line("", 0);
-    rl_point = 0;
+    
     rl_mark = 0;
     rl_reset_line_state();
     rl_forced_update_display();
