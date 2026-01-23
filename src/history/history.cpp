@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdio>
+#include <fmt/base.h>
 #include <iterator>
 #include <optional>
 #include <string>
@@ -18,6 +19,7 @@ typedef struct { int row, col; } CursorPos;
 static vector<string> filtered_history;
 static string cached_prefix;
 static size_t history_size;
+static string last_buffer;
 
 vector<string> get_matching_commands(const vector<string> &commands, const string &prefix) {
     vector<string> filtered;
@@ -27,7 +29,7 @@ vector<string> get_matching_commands(const vector<string> &commands, const strin
     return filtered;
 }
 
-optional<string> get_first_match(const vector<string> &commands, const string &prefix) {
+optional<string> get_first_match_ext(const vector<string> &commands, const string &prefix) {
     for (const string &x : std::vector(commands.rbegin(), commands.rend())) {
         if (starts_with(x, prefix)) {
             return x.substr(prefix.size());
@@ -142,4 +144,45 @@ vector<string> read_history_file(const string &file_path) {
     }
 
     return lines;
+}
+
+int startup_hook() {
+    last_buffer.clear();
+    return 0;
+}
+
+int check_buffer() {
+    string current(rl_line_buffer);
+    if (current != last_buffer) {
+        optional<string> extension = get_first_match_ext(history, current);
+        
+        static string suggestion;
+        static string prev_suggestion;
+        
+        if (!prev_suggestion.empty()) {
+            for (size_t i = 0; i < prev_suggestion.length(); i++) {
+                fmt::print(" ");
+            }
+            for (size_t i = 0; i < prev_suggestion.length(); i++) {
+                fmt::print("\033[D");
+            }
+            fflush(stdout);
+        }
+        
+        suggestion = extension ? *extension : "";
+        
+        // Print new suggestion
+        if (!suggestion.empty()) {
+            fmt::print("\033[90m{}\033[0m", suggestion);
+            
+            for (size_t i = 0; i < suggestion.length(); i++) {
+                fmt::print("\033[D");
+            }
+            fflush(stdout);
+        }
+        
+        prev_suggestion = suggestion;
+        last_buffer = current;
+    }
+    return 0;
 }

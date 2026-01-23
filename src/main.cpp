@@ -136,6 +136,9 @@ int main(int argc, char* argv[]) {
 
     rl_bind_keyseq("\033[A", arrow_up);
     rl_bind_keyseq("\033[B", arrow_down);
+    // Might readd when better
+    // rl_startup_hook = startup_hook;
+    // rl_event_hook = check_buffer; 
 
     bool running = true;
     while (running) {

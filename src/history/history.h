@@ -7,5 +7,7 @@
 int arrow_down(int count, int key);
 int arrow_up(int count, int key);
 std::vector<std::string> read_history_file(const std::string &file_path);
+int check_buffer();
+int startup_hook();
 
 #endif
