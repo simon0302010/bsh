@@ -18,6 +18,7 @@
 #include <readline/readline.h>
 #include <vector>
 #include <fstream>
+#include <stdlib.h>
 
 #include "core/command.h"
 #include "core/context.h"
@@ -139,12 +140,13 @@ int main(int argc, char* argv[]) {
     bool running = true;
     while (running) {
         string prompt = fmt::format("\033[34m{}@{}:\033[36m{}\033[33m{} {} ", username, hostname, replace_all(bsh_context.current_dir, homedir, "~"), get_exit_code_string(), get_prompt_symbol());
-        const char* input_c = readline(prompt.c_str());
+        char* input_c = readline(prompt.c_str());
         if (input_c == nullptr) {
             break;
         }
 
         string input = string(input_c);
+        ::free(input_c);
         for (const string &command : prepare_input(input)) {
             bsh_context.command = command;
             if (bsh_context.command.empty()) {

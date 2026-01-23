@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <iterator>
+#include <optional>
 #include <string>
 #include <vector>
 #include <fstream>
@@ -24,6 +25,15 @@ vector<string> get_matching_commands(const vector<string> &commands, const strin
         return starts_with(command, prefix);
     });
     return filtered;
+}
+
+optional<string> get_first_match(const vector<string> &commands, const string &prefix) {
+    for (const string &x : std::vector(commands.rbegin(), commands.rend())) {
+        if (starts_with(x, prefix)) {
+            return x.substr(prefix.size());
+        }
+    }
+    return nullopt;
 }
 
 CursorPos get_cursor() {
