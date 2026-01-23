@@ -100,6 +100,11 @@ vector<string> split_command(const string &command) {
                     args.push_back(arg);
                     arg.clear();
                 }
+            } else if (c == '#') {
+                if (!arg.empty()) {
+                    args.push_back(arg);
+                }
+                return args;
             } else {
                 arg.push_back(c);
             }
