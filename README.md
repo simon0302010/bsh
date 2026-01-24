@@ -15,6 +15,7 @@ Bsh (short for bad shell) is a simple shell made by me in C++. It supports basic
 - Command history – Lets you run commands from your history (also some other stuff but not enough space)
 - Displays the last exit code 🤯
 - Multiline commands using \ and separating commands using ;
+- Support for all kinds of wildcards
 
 ## Requirements
 

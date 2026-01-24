@@ -10,6 +10,7 @@
 #include <algorithm>
 
 #include "globals.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -66,12 +67,10 @@ int get_operator_length(const string &command, size_t i) {
     return 0;
 }
 
-
-
 /// Splits a command up into a vec<string>
-vector<string> split_command(const string &command) {
-    vector<string> args;
-    string arg;
+vector<Argument> split_command(const string &command) {
+    vector<Argument> args;
+    Argument arg;
     bool in_double_quotes = false;
     bool in_single_quotes = false;
 
@@ -87,39 +86,44 @@ vector<string> split_command(const string &command) {
         }
 
         if (in_double_quotes || in_single_quotes) {
-            arg.push_back(c);
+            arg.text.push_back(c);
+            arg.can_glob.push_back(false);
         } else {
             int op_len = get_operator_length(command, i);
             if (op_len > 0) {
-                if (!arg.empty()) {
+                if (!arg.text.empty()) {
                     args.push_back(arg);
-                    arg.clear();
+                    arg = {};
                 }
-                args.push_back(command.substr(i, op_len));
+                string operator_char = command.substr(i, op_len);
+                args.push_back(Argument {operator_char, vector<bool>(operator_char.size(), false)});
                 i += op_len - 1;
             } else if (c == '\\') {
                 if (i + 1 < command.size()) {
-                    arg.push_back(command[i + 1]);
+                    arg.text.push_back(command[i + 1]);
+                    arg.can_glob.push_back(false);
                     i++;
                 } else {
-                    arg.push_back(c);
+                    arg.text.push_back(c);
                 }
+                arg.can_glob.push_back(false);
             } else if (c == ' ') {
-                if (!arg.empty()) {
+                if (!arg.text.empty()) {
                     args.push_back(arg);
-                    arg.clear();
+                    arg = {};
                 }
             } else if (c == '#') {
-                if (!arg.empty()) {
+                if (!arg.text.empty()) {
                     args.push_back(arg);
                 }
                 return args;
             } else {
-                arg.push_back(c);
+                arg.text.push_back(c);
+                arg.can_glob.push_back(true);
             }
         }
     }
-    if (!arg.empty()) {
+    if (!arg.text.empty()) {
         args.push_back(arg);
     }
     
@@ -129,6 +133,25 @@ vector<string> split_command(const string &command) {
     }*/
 
     return args;
+}
+
+bool needs_glob(const Argument &a) {
+    bool open = false;
+    for (size_t i = 0; i < a.text.size(); ++i) {
+        if (!a.can_glob[i]) continue;
+
+        char c = a.text[i];
+        if (c == '*' || c == '?' || c == '~') {
+            return true;
+        }
+        if (c == '[') {
+            open = true;
+        }
+        if (c == ']' && open) {
+            return true;
+        }
+    }
+    return false;
 }
 
 string replace_env_vars(const string &command) {    

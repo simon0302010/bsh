@@ -1,9 +1,11 @@
 #include <array>
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <fmt/base.h>
 #include <fmt/core.h>
 #include <fmt/format.h>
+#include <glob.h>
 #include <optional>
 #include <string>
 #include <sys/types.h>
@@ -217,13 +219,49 @@ void run_command(const vector<string> &command_parts, const string &command) {
     }
 }
 
+vector<string> globber(const vector<Argument> &args) {
+    vector<string> full_result;
+
+    for (const Argument &arg : args) {
+        if (!needs_glob(arg)) {
+            full_result.push_back(arg.text);
+            continue;
+        }
+
+        glob_t g{};
+        int flags = GLOB_NOCHECK | GLOB_TILDE;
+
+        int rc = glob(arg.text.c_str(), flags, nullptr, &g);
+        if (rc == 0 || rc == GLOB_NOMATCH) {
+            for (size_t i = 0; i < g.gl_pathc; ++i) {
+                full_result.emplace_back(g.gl_pathv[i]);
+            }
+        } else {
+            println("glob failed with code {} for pattern '{}'", rc, arg.text);
+            // add original pattern if glob fails
+            full_result.push_back(arg.text);
+        }
+
+        globfree(&g);
+    }
+
+    /*fmt::println("Globbed command:");
+    for (const string &arg : full_result) {
+        fmt::println("{}", arg);
+    }*/
+
+    return full_result;
+}
+
 // TODO: export command
 bool handle_command(BshContext &bsh_context) {
-    vector<string> command = split_command(replace_env_vars(bsh_context.command));
-    if (command.empty()) {
+    vector<Argument> command_noglob = split_command(replace_env_vars(bsh_context.command));
+    if (command_noglob.empty()) {
         return true;
     }
-    command = expand_home(command, bsh_context.home_dir);
+    
+    // Handles ~, wildcards and stuff
+    vector<string> command = globber(command_noglob);
 
     string exe = command[0];
     vector<string> args(command.begin() + 1, command.end());
