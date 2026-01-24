@@ -1,5 +1,4 @@
 #include "about.h"
-#include <fmt/base.h>
 #include <fmt/core.h>
 
 using namespace fmt;

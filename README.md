@@ -22,7 +22,16 @@ Bsh (short for bad shell) is a simple shell made by me in C++. It supports basic
 - A computer
 - Linux
 
-## Installation
+## Installation from the AUR
+
+If you're running an arch based distro, you can install bsh from the AUR:
+
+```bash
+yay -S bsh-git
+```
+> You can also use any other AUR helper
+
+## Installation from source
 
 1. Install dependencies (example for Arch Linux):
     ```bash
