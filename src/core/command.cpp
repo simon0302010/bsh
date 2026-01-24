@@ -114,7 +114,10 @@ void run_command(const vector<string> &command_parts, const string &command) {
 
     vector<array<int, 2>> pipes(num_commands - 1);
     for (int i = 0; i < num_commands - 1; i++) {
-        pipe(pipes[i].data());
+        if (pipe(pipes[i].data()) != 0) {
+            println("failed to create pipe {}", i + 1);
+            return;
+        }
     }
 
     vector<pid_t> pids(num_commands);

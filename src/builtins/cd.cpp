@@ -49,7 +49,5 @@ int cd_command(BshContext &bsh_context, const vector<string> &args) {
     }
 
     bsh_context.current_dir = fs::canonical(target).string();
-    chdir(bsh_context.current_dir.c_str());
-
-    return 0;
+    return chdir(bsh_context.current_dir.c_str());
 }
