@@ -58,6 +58,7 @@ optional<vector<Cmd>> parse_redirection(const vector<vector<string>> &command_pa
             } else if (command[i] == ">") {
                 if (i + 1 >= command.size()) {
                     println("missing file after >");
+
                     return nullopt;
                 }
                 cmd.stdout_stream = {command[i + 1], FileMode::Overwrite};

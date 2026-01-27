@@ -90,6 +90,11 @@ int run_from_file(string file) {
     return last_exit_code;
 }
 
+char **filename_completition(const char *text, int start, int end) {
+    rl_filename_quoting_desired = 1;
+    return 0;
+}
+
 int main(int argc, char* argv[]) {
     // running script
     if (argc > 1) {
@@ -136,9 +141,13 @@ int main(int argc, char* argv[]) {
 
     rl_bind_keyseq("\033[A", arrow_up);
     rl_bind_keyseq("\033[B", arrow_down);
-    // Might readd when better
+    // Might add back when better
     // rl_startup_hook = startup_hook;
     // rl_event_hook = check_buffer; 
+
+    rl_attempted_completion_function = filename_completition;
+    rl_completer_quote_characters = "\"";
+    rl_filename_quote_characters  = " ";
 
     bool running = true;
     while (running) {

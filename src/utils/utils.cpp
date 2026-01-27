@@ -47,7 +47,7 @@ bool is_command_operator(const char &c) {
     return false;
 }
 
-// Returns operator length. 0 if it's not one.
+// Returns operator length. 0 if it's not an operator.
 int get_operator_length(const string &command, size_t i) {
     if (i >= command.size()) {
         return 0;
