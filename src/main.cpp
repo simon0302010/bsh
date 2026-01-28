@@ -130,6 +130,9 @@ int main(int argc, char* argv[]) {
         bsh_context.current_dir = string(cwd);
     }
 
+    // loading config
+    // auto config = 
+
     // main loop
     bsh_context.home_dir = homedir;
 

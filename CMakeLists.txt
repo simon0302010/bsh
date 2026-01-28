@@ -5,10 +5,18 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include(FetchContent)
+
 FetchContent_Declare(fmt
     URL https://github.com/fmtlib/fmt/releases/download/11.0.1/fmt-11.0.1.zip
 )
 FetchContent_MakeAvailable(fmt)
+
+FetchContent_Declare(
+    tomlplusplus
+    GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+    GIT_TAG        v3.4.0
+)
+FetchContent_MakeAvailable(tomlplusplus)
 
 file(GLOB SOURCES
     "src/*.cpp"
