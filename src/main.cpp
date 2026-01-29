@@ -25,6 +25,7 @@
 #include "utils/utils.h"
 #include "utils/globals.h"
 #include "history/history.h"
+#include "utils/config.h"
 
 using namespace std;
 
