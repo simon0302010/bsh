@@ -1,4 +1,5 @@
 #include <array>
+#include <chrono>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
@@ -259,6 +260,7 @@ vector<string> globber(const vector<Argument> &args) {
 
 // TODO: export command
 bool handle_command(BshContext &bsh_context) {
+    chrono::steady_clock::time_point begin = chrono::steady_clock::now();
     vector<Argument> command_noglob = split_command(replace_env_vars(bsh_context.command));
     if (command_noglob.empty()) {
         return true;
@@ -283,5 +285,9 @@ bool handle_command(BshContext &bsh_context) {
     } else {
         run_command(command, bsh_context.command);
     }
+
+    chrono::steady_clock::time_point end = chrono::steady_clock::now();
+    last_command_duration = static_cast<long>(chrono::duration_cast<chrono::milliseconds>(end - begin).count());
+
     return true;
 }

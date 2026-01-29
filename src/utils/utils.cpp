@@ -314,3 +314,15 @@ string get_prompt_symbol() {
         return fmt::format("\033[1m\033[92m{}\033[0m", symbol);
     }
 }
+
+string format_duration(long duration) {
+    if (duration <= 750) {
+        return fmt::format("{}ms", duration);
+    } else if (duration / 1000 < 60) {
+        return fmt::format("{:.3f}s", duration / 1000.0);
+    } else if (duration / 1000 % 60 == 0) {
+        return fmt::format("{}m", duration / 1000 / 60);
+    } else {
+        return fmt::format("{}m{:.3f}s", duration / 1000 / 60, duration % (1000 * 60) / 1000.0);
+    }
+}

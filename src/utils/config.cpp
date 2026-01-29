@@ -1,4 +1,5 @@
 #include "core/context.h"
+#include "utils/globals.h"
 #include <iostream>
 #include <fmt/base.h>
 #include <filesystem>
@@ -32,12 +33,14 @@ int load_config(const string &path) {
 
 string get_prompt(const BshContext &context) {
     string prompt = config["prompt"].value_or("\033[34mUSERNAME@HOSTNAME:\033[36mWORKINGDIRECTORY\033[33mEXITCODE PROMPTSYMBOL ");
+    // string prompt = "[DURATION] PROMPTSYMBOL ";
 
     replace_all(prompt, "USERNAME", context.username);
     replace_all(prompt, "HOSTNAME", context.hostname);
     replace_all(prompt, "WORKINGDIRECTORY", replace_all_return(context.current_dir, context.home_dir, "~"));
     replace_all(prompt, "EXITCODE", get_exit_code_string());
     replace_all(prompt, "PROMPTSYMBOL", get_prompt_symbol());
+    replace_all(prompt, "DURATION", format_duration(last_command_duration));
 
     return prompt;
 }

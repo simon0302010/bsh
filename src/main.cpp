@@ -1,5 +1,6 @@
 #include <csignal>
 #include <cstddef>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -37,6 +38,9 @@ void sigint_handler(int s) {
     rl_on_new_line();
     rl_redisplay();
     history_idx = -1;
+    last_command_duration = 0;
+    chrono::system_clock::time_point now = chrono::system_clock::now();
+    last_command_timestamp = static_cast<long>(chrono::duration_cast<chrono::seconds>(now.time_since_epoch()).count());
 }
 
 string read_file(const string &path) {
@@ -149,6 +153,10 @@ int main(int argc, char* argv[]) {
         if (input_c == nullptr) {
             break;
         }
+
+        last_command_duration = 0;
+        chrono::system_clock::time_point now = chrono::system_clock::now();
+        last_command_timestamp = static_cast<long>(chrono::duration_cast<chrono::seconds>(now.time_since_epoch()).count());
 
         string input = string(input_c);
         ::free(input_c);

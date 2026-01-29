@@ -21,5 +21,6 @@ std::vector<char*> into_c_vec(const std::vector<std::string> &input);
 std::vector<std::string> prepare_input(const std::string &s);
 bool needs_glob(const Argument &a);
 std::string get_prompt_symbol();
+std::string format_duration(long duration);
 
 #endif
