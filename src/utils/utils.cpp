@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <unistd.h>
 #include <fmt/base.h>
 #include <fmt/format.h>
 #include <string>
@@ -17,7 +18,15 @@ using namespace std;
 regex env_var_pattern(R"(\$\{[A-Za-z_][A-Za-z0-9_]*\}|\$[A-Za-z_][A-Za-z0-9_]*)");
 const char* OPERATORS[] = {"|", ">", "<", ">>", "2>", "2>>"};
 
-string replace_all(string s, const string& target, const string& replacement) {
+void replace_all(string& s, const string& target, const string& replacement) {
+    size_t pos = 0;
+    while ((pos = s.find(target, pos)) != string::npos) {
+        s.replace(pos, target.length(), replacement);
+        pos += replacement.length();
+    }
+}
+
+string replace_all_return(string s, const string& target, const string& replacement) {
     size_t pos = 0;
     while ((pos = s.find(target, pos)) != string::npos) {
         s.replace(pos, target.length(), replacement);
@@ -291,4 +300,17 @@ vector<string> prepare_input(const string &s) {
     }*/
 
     return splitted_string;
+}
+
+string get_prompt_symbol() {
+    string symbol = "$";
+    if (geteuid() == 0) {
+       symbol = "#";
+    }
+
+    if (last_exit_code != 0){
+        return fmt::format("\033[1m\033[91m{}\033[0m", symbol);
+    } else {
+        return fmt::format("\033[1m\033[92m{}\033[0m", symbol);
+    }
 }

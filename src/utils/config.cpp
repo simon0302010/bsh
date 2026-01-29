@@ -1,13 +1,14 @@
+#include "core/context.h"
 #include <iostream>
 #include <fmt/base.h>
 #include <filesystem>
-#include <optional>
+#include <string>
 
 #define TOML_EXCEPTIONS 0
 #include <toml++/toml.hpp>
-#include <toml++/impl/forward_declarations.hpp>
-#include <toml++/impl/parser.hpp>
-#include <toml++/impl/table.hpp>
+
+#include "utils.h"
+#include "../core/context.h"
 
 using namespace std;
 
@@ -29,9 +30,14 @@ int load_config(const string &path) {
     }
 }
 
-toml::table get_config() {
-    if (config.empty()) {
-        throw runtime_error("Config not loaded");
-    }
-    return config;
+string get_prompt(const BshContext &context) {
+    string prompt = config["prompt"].value_or("\033[34mUSERNAME@HOSTNAME:\033[36mWORKINGDIRECTORY\033[33mEXITCODE PROMPTSYMBOL ");
+
+    replace_all(prompt, "USERNAME", context.username);
+    replace_all(prompt, "HOSTNAME", context.hostname);
+    replace_all(prompt, "WORKINGDIRECTORY", replace_all_return(context.current_dir, context.home_dir, "~"));
+    replace_all(prompt, "EXITCODE", get_exit_code_string());
+    replace_all(prompt, "PROMPTSYMBOL", get_prompt_symbol());
+
+    return prompt;
 }

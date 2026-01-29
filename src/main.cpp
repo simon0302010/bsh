@@ -39,19 +39,6 @@ void sigint_handler(int s) {
     history_idx = -1;
 }
 
-string get_prompt_symbol() {
-    string symbol = "$";
-    if (geteuid() == 0) {
-       symbol = "#";
-    }
-
-    if (last_exit_code != 0){
-        return fmt::format("\033[1m\033[91m{}\033[0m", symbol);
-    } else {
-        return fmt::format("\033[1m\033[92m{}\033[0m", symbol);
-    }
-}
-
 string read_file(const string &path) {
     ifstream file(path, ios::binary);
     if (!file) {
@@ -136,6 +123,8 @@ int main(int argc, char* argv[]) {
 
     // main loop
     bsh_context.home_dir = homedir;
+    bsh_context.username = username;
+    bsh_context.hostname = hostname;
 
     history = read_history_file(homedir + "/.bsh_history");
     ofstream history_file(homedir + "/.bsh_history", ios::app);
@@ -155,7 +144,7 @@ int main(int argc, char* argv[]) {
 
     bool running = true;
     while (running) {
-        string prompt = fmt::format("\033[34m{}@{}:\033[36m{}\033[33m{} {} ", username, hostname, replace_all(bsh_context.current_dir, homedir, "~"), get_exit_code_string(), get_prompt_symbol());
+        string prompt = get_prompt(bsh_context);
         char* input_c = readline(prompt.c_str());
         if (input_c == nullptr) {
             break;
