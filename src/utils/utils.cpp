@@ -8,7 +8,8 @@
 #include <string>
 #include <vector>
 #include <regex>
-#include <algorithm>
+#include <algorithm> 
+#include <cctype>
 
 #include "globals.h"
 #include "utils.h"
@@ -325,4 +326,50 @@ string format_duration(long duration) {
     } else {
         return fmt::format("{}m{:.3f}s", duration / 1000 / 60, duration % (1000 * 60) / 1000.0);
     }
+}
+
+vector<string> split_string(const string &s, char splitter) {
+    vector<string> result;
+    string current_str;
+    for (char c : s) {
+        if (c == splitter) {
+            if (!current_str.empty()) {
+                result.push_back(current_str);
+            }
+        } else {
+            current_str.push_back(c);
+        }
+    }
+
+    if (!current_str.empty()) {
+        result.push_back(current_str);
+    }
+
+    return result;
+}
+
+void set_env(const string &key, const string &value) {
+    environment_vars[key] = value;
+}
+
+string get_env(const string &key) {
+    auto value = environment_vars.find(key);
+    if (value != environment_vars.end()) {
+        return value->second;
+    }
+    return "";
+}
+
+// Trim from the start (in place)
+inline void ltrim(string &s) {
+    s.erase(s.begin(), find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !isspace(ch);
+    }));
+}
+
+// Trim from the end (in place)
+inline void rtrim(string &s) {
+    s.erase(find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !isspace(ch);
+    }).base(), s.end());
 }

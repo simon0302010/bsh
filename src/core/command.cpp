@@ -21,6 +21,7 @@
 #include "../builtins/about.h"
 #include "../utils/globals.h"
 #include "../builtins/history.h"
+#include "../builtins/export.h"
 
 using namespace std;
 using namespace fmt;
@@ -282,6 +283,8 @@ bool handle_command(BshContext &bsh_context) {
         last_exit_code = show_about();
     } else if (exe == "history") {
         last_exit_code = history_command(args);
+    } else if (exe == "export") {
+        last_exit_code = export_command(bsh_context);
     } else {
         run_command(command, bsh_context.command);
     }

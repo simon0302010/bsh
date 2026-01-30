@@ -123,7 +123,8 @@ int main(int argc, char* argv[]) {
     }
 
     // loading config
-    // auto config = 
+    // int config_result = load_config(homedir + "/.bshrc");
+    // fmt::println("{}", config_result);
 
     // main loop
     bsh_context.home_dir = homedir;
