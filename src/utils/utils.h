@@ -3,6 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <cctype>
+#include <optional>
 
 struct Argument {
     std::string text;
@@ -24,8 +27,21 @@ std::string get_prompt_symbol();
 std::string format_duration(long duration);
 std::vector<std::string> split_string(const std::string &s, char splitter);
 void set_env(const std::string &key, const std::string &value);
-std::string get_env(const std::string &key);
-inline void ltrim(std::string &s);
-inline void rtrim(std::string &s);
+const char * get_var(const std::string &key);
+void get_env();
+
+// Trim from the start (in place)
+inline void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+// Trim from the end (in place)
+inline void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
 
 #endif

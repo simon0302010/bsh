@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <optional>
 #include <unistd.h>
 #include <fmt/base.h>
 #include <fmt/format.h>
@@ -9,7 +10,6 @@
 #include <vector>
 #include <regex>
 #include <algorithm> 
-#include <cctype>
 
 #include "globals.h"
 #include "utils.h"
@@ -176,7 +176,14 @@ string replace_env_vars(const string &command) {
         clean_var.erase(remove(clean_var.begin(), clean_var.end(), '}'), clean_var.end());
         clean_var.erase(remove(clean_var.begin(), clean_var.end(), '$'), clean_var.end());
         
-        const char* env_value = getenv(clean_var.c_str());
+        const char * user_var = get_var(clean_var);
+        const char * env_value = nullptr;
+        if (user_var != nullptr) {
+            env_value = user_var;
+        } else {
+            env_value = getenv(clean_var.c_str());
+        }
+
         string replacement;
         
         if (env_value != nullptr) {
@@ -194,7 +201,7 @@ string replace_env_vars(const string &command) {
                 replacement = "\"" + string(env_value) + "\"";
             }
         } else {
-            replacement = found_string;
+            replacement = "";
         }
         
         result.replace(match.position(), match.length(), replacement);
@@ -335,6 +342,7 @@ vector<string> split_string(const string &s, char splitter) {
         if (c == splitter) {
             if (!current_str.empty()) {
                 result.push_back(current_str);
+                current_str.clear();
             }
         } else {
             current_str.push_back(c);
@@ -352,24 +360,23 @@ void set_env(const string &key, const string &value) {
     environment_vars[key] = value;
 }
 
-string get_env(const string &key) {
+const char * get_var(const string &key) {
     auto value = environment_vars.find(key);
     if (value != environment_vars.end()) {
-        return value->second;
+        return value->second.c_str();
     }
-    return "";
+    return nullptr;
 }
 
-// Trim from the start (in place)
-inline void ltrim(string &s) {
-    s.erase(s.begin(), find_if(s.begin(), s.end(), [](unsigned char ch) {
-        return !isspace(ch);
-    }));
-}
+//char **get_env() {
+void get_env() {
+    vector<string> environment;
 
-// Trim from the end (in place)
-inline void rtrim(string &s) {
-    s.erase(find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
-        return !isspace(ch);
-    }).base(), s.end());
+    for (int i = 0; environ[i] != NULL; ++i) {
+        environment.push_back(string(environ[i]));
+    }
+
+    for (const auto &entry : environment_vars) {
+        fmt::println("Key: {}, Value: {}", entry.first, entry.second);
+    }
 }

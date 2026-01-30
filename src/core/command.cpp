@@ -194,6 +194,7 @@ void run_command(const vector<string> &command_parts, const string &command) {
             }
             c_args.push_back(nullptr);
 
+            get_env();
             execvp(c_args[0], c_args.data());
             string error_msg = ("failed to execute \"" + commands[i].args[0] + "\"");
             perror(error_msg.c_str());

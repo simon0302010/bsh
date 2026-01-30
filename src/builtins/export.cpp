@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "../utils/utils.h"
+#include "../utils/globals.h"
 #include "core/context.h"
 #include "fmt/base.h"
 #include "fmt/core.h"
@@ -26,8 +27,7 @@ int export_command(const BshContext &context) {
     ltrim(value);
     rtrim(value);
 
-    println("Key: {}", key);
-    println("Value: {}", value);
+    environment_vars[key] = value;
 
     return 0;
 }
