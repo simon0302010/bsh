@@ -194,15 +194,16 @@ void run_command(const vector<string> &command_parts, const string &command) {
             }
             c_args.push_back(nullptr);
 
-            // getting environment
-            vector<char*> environment = get_env();
-            char * envp[environment.size()];
-            for (int i = 0; i < environment.size(); i++) {
-                envp[i] = environment[i];
+            // getting environment - keep strings alive!
+            vector<string> env_strings = get_env();
+            vector<char*> envp;
+            for (const string &s : env_strings) {
+                envp.push_back(const_cast<char*>(s.c_str()));
             }
+            envp.push_back(nullptr);
 
             // executing command
-            execvpe(c_args[0], c_args.data(), envp);
+            execvpe(c_args[0], c_args.data(), envp.data());
             string error_msg = ("failed to execute \"" + commands[i].args[0] + "\"");
             perror(error_msg.c_str());
             exit(1);
@@ -267,7 +268,18 @@ vector<string> globber(const vector<Argument> &args) {
     return full_result;
 }
 
-// TODO: export command
+void set_vars(vector<string> &command) {
+    for (int i = 0; i < command.size(); i++) {
+        vector<string> var_split = split_string(command[i], '=');
+        if (var_split.size() == 2) {
+            current_vars.push_back(command[i]);
+            command[i] = nullptr;
+        } else {
+            break;
+        }
+    }
+}
+
 bool handle_command(BshContext &bsh_context) {
     chrono::steady_clock::time_point begin = chrono::steady_clock::now();
     vector<Argument> command_noglob = split_command(replace_env_vars(bsh_context.command));
@@ -278,8 +290,13 @@ bool handle_command(BshContext &bsh_context) {
     // Handles ~, wildcards and stuff
     vector<string> command = globber(command_noglob);
 
+    // sets variables for command
+    current_vars.clear();
+    set_vars(command);
+
     string exe = command[0];
     vector<string> args(command.begin() + 1, command.end());
+    bsh_context.args = args;
     if (exe == "exit") {
         return false;
     } else if (exe == "pwd") {

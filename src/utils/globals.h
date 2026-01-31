@@ -13,5 +13,6 @@ inline bool clear_history_file = false;
 inline long last_command_duration = 0; // time last command took to execute in milliseconds
 inline long last_command_timestamp = 0; // unix timestamp of time last command finished
 inline std::pmr::unordered_map<std::string, std::string> environment_vars;
+inline std::vector<std::string> current_vars;
 
 #endif

@@ -186,19 +186,7 @@ string replace_env_vars(const string &command) {
         string replacement;
         
         if (env_value != nullptr) {
-            // check if already inside quotes
-            size_t pos = match.position();
-            bool already_quoted = false;
-            
-            if (pos > 0 && (result[pos-1] == '"' || result[pos-1] == '\'')) {
-                already_quoted = true;
-            }
-            
-            if (already_quoted) {
-                replacement = string(env_value);
-            } else {
-                replacement = "\"" + string(env_value) + "\"";
-            }
+            replacement = string(env_value);
         } else {
             replacement = "";
         }
@@ -367,13 +355,15 @@ const char * get_var(const string &key) {
     return nullptr;
 }
 
-vector<char*> get_env() {
+vector<string> get_env() {
     vector<string> environment;
 
+    // system vars
     for (int i = 0; environ[i] != NULL; ++i) {
         environment.push_back(string(environ[i]));
     }
 
+    // vars set using export
     for (const auto &entry : environment_vars) {
         bool found = false;
         for (int i = 0; i < environment.size(); i++) {
@@ -387,11 +377,19 @@ vector<char*> get_env() {
         }
     }
 
-    std::vector<char*> envp;
-    for (int i = 0; i < environment.size(); i++) {
-        envp.push_back(const_cast<char*>(environment[i].c_str()));
+    // vars for current command
+    for (const string &entry : current_vars) {
+        bool found = false;
+        for (int i = 0; i < environment.size(); i++) {
+            if (split_string(environment[i], '=')[0] == split_string(entry, '=')[0]) {
+                environment[i] = entry;
+                found = true;
+            }
+        }
+        if (!found) {
+            environment.push_back(entry);
+        }
     }
-    envp.push_back(nullptr);
 
-    return envp;
+    return environment;
 }

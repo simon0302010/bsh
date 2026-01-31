@@ -11,23 +11,21 @@ using namespace std;
 using namespace fmt;
 
 int export_command(const BshContext &context) {
-    string args = context.command.substr(6);
-    vector<string> parameters = split_string(args, '=');
-
-    if (parameters.size() != 2) {
-        println("Usage: export KEY=VALUE");
-        return 1;
+    if (context.args.empty()) {
+        for (const string &var : get_env()) {
+            println("{}", var);
+        }
+    } else {
+        for (const string &arg : context.args) {
+            vector<string> parameters = split_string(arg, '=');
+            if (parameters.size() != 2) {
+                println("export: invalid syntax");
+                return 1;
+            } else {
+                environment_vars[parameters[0]] = parameters[1];
+            }
+        }
     }
-
-    string key = parameters[0];
-    ltrim(key);
-    rtrim(key);
-
-    string value = parameters[1];
-    ltrim(value);
-    rtrim(value);
-
-    environment_vars[key] = value;
 
     return 0;
 }
