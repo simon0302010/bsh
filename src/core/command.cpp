@@ -273,7 +273,8 @@ void set_vars(vector<string> &command) {
         vector<string> var_split = split_string(command[i], '=');
         if (var_split.size() == 2) {
             current_vars.push_back(command[i]);
-            command[i] = nullptr;
+            command.erase(command.begin() + i);
+            i--;
         } else {
             break;
         }
