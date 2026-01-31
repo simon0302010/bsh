@@ -2,7 +2,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <optional>
 #include <unistd.h>
 #include <fmt/base.h>
 #include <fmt/format.h>
@@ -368,8 +367,7 @@ const char * get_var(const string &key) {
     return nullptr;
 }
 
-//char **get_env() {
-void get_env() {
+vector<char*> get_env() {
     vector<string> environment;
 
     for (int i = 0; environ[i] != NULL; ++i) {
@@ -377,6 +375,23 @@ void get_env() {
     }
 
     for (const auto &entry : environment_vars) {
-        fmt::println("Key: {}, Value: {}", entry.first, entry.second);
+        bool found = false;
+        for (int i = 0; i < environment.size(); i++) {
+            if (split_string(environment[i], '=')[0] == entry.first) {
+                environment[i] = fmt::format("{}={}", entry.first, entry.second);
+                found = true;
+            }
+        }
+        if (!found) {
+            environment.push_back(fmt::format("{}={}", entry.first, entry.second));
+        }
     }
+
+    std::vector<char*> envp;
+    for (int i = 0; i < environment.size(); i++) {
+        envp.push_back(const_cast<char*>(environment[i].c_str()));
+    }
+    envp.push_back(nullptr);
+
+    return envp;
 }

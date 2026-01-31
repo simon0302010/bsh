@@ -5,7 +5,6 @@
 #include <vector>
 #include <algorithm>
 #include <cctype>
-#include <optional>
 
 struct Argument {
     std::string text;
@@ -28,7 +27,7 @@ std::string format_duration(long duration);
 std::vector<std::string> split_string(const std::string &s, char splitter);
 void set_env(const std::string &key, const std::string &value);
 const char * get_var(const std::string &key);
-void get_env();
+std::vector<char*> get_env();
 
 // Trim from the start (in place)
 inline void ltrim(std::string &s) {

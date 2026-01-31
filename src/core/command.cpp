@@ -194,8 +194,15 @@ void run_command(const vector<string> &command_parts, const string &command) {
             }
             c_args.push_back(nullptr);
 
-            get_env();
-            execvp(c_args[0], c_args.data());
+            // getting environment
+            vector<char*> environment = get_env();
+            char * envp[environment.size()];
+            for (int i = 0; i < environment.size(); i++) {
+                envp[i] = environment[i];
+            }
+
+            // executing command
+            execvpe(c_args[0], c_args.data(), envp);
             string error_msg = ("failed to execute \"" + commands[i].args[0] + "\"");
             perror(error_msg.c_str());
             exit(1);
