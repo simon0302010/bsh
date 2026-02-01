@@ -178,20 +178,23 @@ string replace_env_vars(const string &command) {
         clean_var.erase(remove(clean_var.begin(), clean_var.end(), '}'), clean_var.end());
         clean_var.erase(remove(clean_var.begin(), clean_var.end(), '$'), clean_var.end());
         
-        const char * user_var = get_var(clean_var);
-        const char * env_value = nullptr;
-        if (user_var != nullptr) {
-            env_value = user_var;
-        } else {
-            env_value = getenv(clean_var.c_str());
-        }
-
         string replacement;
-        
-        if (env_value != nullptr) {
-            replacement = string(env_value);
-        } else {
+
+        if (find(unset_vars.begin(), unset_vars.end(), clean_var) != unset_vars.end()) {
             replacement = "";
+        } else {
+            string user_var = get_var(clean_var);
+            const char * env_value = nullptr;
+            if (!user_var.empty()) {
+                replacement = user_var;
+            } else {
+                env_value = getenv(clean_var.c_str());
+                if (env_value != nullptr) {
+                    replacement = string(env_value);
+                } else {
+                    replacement = "";
+                }
+            }
         }
         
         result.replace(match.position(), match.length(), replacement);
@@ -228,15 +231,6 @@ vector<vector<string>> split_vector(const vector<string> &items, const string &s
     splitted_vector.push_back(current_vector);
 
     return splitted_vector;
-}
-
-vector<char*> into_c_vec(const vector<string> &input) {
-    vector<char*> output;
-    for (const string &s : input) {
-        output.push_back(const_cast<char*>(s.c_str()));
-    }
-    output.push_back(nullptr);
-    return output;
 }
 
 vector<vector<string>> split_vector_deeper(const vector<string> &items, const char &splitter) {
@@ -347,15 +341,20 @@ vector<string> split_string(const string &s, char splitter) {
 }
 
 void set_env(const string &key, const string &value) {
+    auto unset_pos = find(unset_vars.begin(), unset_vars.end(), key);
+    if (unset_pos != unset_vars.end()) {
+        unset_vars.erase(unset_pos);
+    }
+
     environment_vars[key] = value;
 }
 
-const char * get_var(const string &key) {
+string get_var(const string &key) {
     auto value = environment_vars.find(key);
     if (value != environment_vars.end()) {
         return value->second.c_str();
     }
-    return nullptr;
+    return "";
 }
 
 string get_var_or(const string &key, const string &alt) {
@@ -389,7 +388,16 @@ vector<string> get_env() {
         }
     }
 
-    // vars for current command
+    // erase unset vars
+    for (int i = 0; i < environment.size(); i++) {
+        string key = split_string(environment[i], '=')[0];
+        if (find(unset_vars.begin(), unset_vars.end(), key) != unset_vars.end()) {
+            environment.erase(environment.begin() + i);
+            i--;
+        }
+    }
+
+    // vars for current command. unset does not affect this.
     for (const string &entry : current_vars) {
         bool found = false;
         for (int i = 0; i < environment.size(); i++) {

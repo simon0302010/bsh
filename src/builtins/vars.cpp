@@ -22,8 +22,22 @@ int export_command(const BshContext &context) {
                 println("export: invalid syntax");
                 return 1;
             } else {
-                environment_vars[parameters[0]] = parameters[1];
+                set_env(parameters[0], parameters[1]);
             }
+        }
+    }
+
+    return 0;
+}
+
+int unset_command(const BshContext &context) {
+    if (context.args.empty()) {
+        println("unset: not enough arguments");
+        return 1;
+    } else {
+        for (const string &arg : context.args) {
+            environment_vars.erase(arg);
+            unset_vars.push_back(arg);
         }
     }
 

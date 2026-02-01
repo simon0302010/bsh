@@ -320,6 +320,8 @@ bool handle_command(BshContext &bsh_context) {
         last_exit_code = history_command(args);
     } else if (exe == "export") {
         last_exit_code = export_command(bsh_context);
+    } else if (exe == "unset") {
+        last_exit_code = unset_command(bsh_context);
     } else {
         run_command(command, bsh_context.command);
     }
