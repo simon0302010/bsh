@@ -295,6 +295,15 @@ bool handle_command(BshContext &bsh_context) {
     current_vars.clear();
     set_vars(command);
 
+    // set as env var
+    if (command.empty()) {
+        for (const string &var : current_vars) {
+            vector<string> parameters = split_string(var, '=');
+            set_env(parameters[0], parameters[1]);
+        }
+        return true;
+    }
+
     string exe = command[0];
     vector<string> args(command.begin() + 1, command.end());
     bsh_context.args = args;
