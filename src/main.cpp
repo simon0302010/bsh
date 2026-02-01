@@ -40,7 +40,6 @@ void sigint_handler(int s) {
     history_idx = -1;
     last_command_duration = 0;
     chrono::system_clock::time_point now = chrono::system_clock::now();
-    last_command_timestamp = static_cast<long>(chrono::duration_cast<chrono::seconds>(now.time_since_epoch()).count());
 }
 
 string read_file(const string &path) {
@@ -157,7 +156,6 @@ int main(int argc, char* argv[]) {
 
         last_command_duration = 0;
         chrono::system_clock::time_point now = chrono::system_clock::now();
-        last_command_timestamp = static_cast<long>(chrono::duration_cast<chrono::seconds>(now.time_since_epoch()).count());
 
         string input = string(input_c);
         ::free(input_c);

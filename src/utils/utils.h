@@ -28,6 +28,7 @@ std::vector<std::string> split_string(const std::string &s, char splitter);
 void set_env(const std::string &key, const std::string &value);
 const char * get_var(const std::string &key);
 std::vector<std::string> get_env();
+std::string get_time_formatted();
 
 // Trim from the start (in place)
 inline void ltrim(std::string &s) {

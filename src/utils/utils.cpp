@@ -2,13 +2,16 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <sstream>
 #include <unistd.h>
 #include <fmt/base.h>
 #include <fmt/format.h>
 #include <string>
 #include <vector>
 #include <regex>
-#include <algorithm> 
+#include <algorithm>
+#include <iomanip>
+#include <ctime>
 
 #include "globals.h"
 #include "utils.h"
@@ -392,4 +395,14 @@ vector<string> get_env() {
     }
 
     return environment;
+}
+
+// Returns current time formatted H:M:S
+string get_time_formatted() {
+    time_t t = time(nullptr);
+    tm tm = *localtime(&t);
+    ostringstream oss;
+    oss << put_time(&tm, "%H:%M:%S");
+    string time_str = oss.str();
+    return time_str;
 }

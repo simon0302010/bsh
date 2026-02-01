@@ -33,7 +33,7 @@ int load_config(const string &path) {
 
 string get_prompt(const BshContext &context) {
     string prompt = config["prompt"].value_or("\033[34mUSERNAME@HOSTNAME:\033[36mWORKINGDIRECTORY\033[33mEXITCODE PROMPTSYMBOL ");
-    // string prompt = "[DURATION] PROMPTSYMBOL ";
+    //string prompt = "[DURATION] [TIME] PROMPTSYMBOL ";
 
     replace_all(prompt, "USERNAME", context.username);
     replace_all(prompt, "HOSTNAME", context.hostname);
@@ -41,6 +41,7 @@ string get_prompt(const BshContext &context) {
     replace_all(prompt, "EXITCODE", get_exit_code_string());
     replace_all(prompt, "PROMPTSYMBOL", get_prompt_symbol());
     replace_all(prompt, "DURATION", format_duration(last_command_duration));
+    replace_all(prompt, "TIME", get_time_formatted());
 
     return prompt;
 }
