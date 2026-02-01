@@ -4,7 +4,7 @@
 using namespace fmt;
 
 int show_about() {
-    println("bsh Version 0.2");
+    println("bsh Version 0.3");
     println("");
     println("bsh  Copyright (C) 2026  simon0302010");
     println("This program comes with ABSOLUTELY NO WARRANTY.");
