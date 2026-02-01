@@ -6,7 +6,7 @@
 
 #include "../core/context.h"
 
-int load_config(const std::string &path);
+int load_config(BshContext ctx);
 std::string get_prompt(const BshContext &context);
 
 #endif

@@ -358,6 +358,15 @@ const char * get_var(const string &key) {
     return nullptr;
 }
 
+string get_var_or(const string &key, const string &alt) {
+    auto value = environment_vars.find(key);
+    if (value != environment_vars.end()) {
+        return value->second;
+    } else {
+        return alt;
+    }
+}
+
 vector<string> get_env() {
     vector<string> environment;
 

@@ -11,6 +11,7 @@ struct BshContext {
     std::string username;
     std::string hostname;
     std::vector<std::string> args;
+    std::string config_path;
 };
 
 #endif

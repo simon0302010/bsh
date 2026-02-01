@@ -121,14 +121,16 @@ int main(int argc, char* argv[]) {
         bsh_context.current_dir = string(cwd);
     }
 
-    // loading config
-    // int config_result = load_config(homedir + "/.bshrc");
-    // fmt::println("{}", config_result);
-
-    // main loop
+    // setting variables in context
     bsh_context.home_dir = homedir;
     bsh_context.username = username;
     bsh_context.hostname = hostname;
+    bsh_context.config_path = homedir + "/.bshrc";
+
+    // read config file
+    if (load_config(bsh_context) != 0) {
+        // just do nothing ig
+    }
 
     history = read_history_file(homedir + "/.bsh_history");
     ofstream history_file(homedir + "/.bsh_history", ios::app);

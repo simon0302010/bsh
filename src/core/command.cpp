@@ -21,7 +21,7 @@
 #include "../builtins/about.h"
 #include "../utils/globals.h"
 #include "../builtins/history.h"
-#include "../builtins/export.h"
+#include "../builtins/vars.h"
 
 using namespace std;
 using namespace fmt;

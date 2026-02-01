@@ -1,39 +1,47 @@
 #include "core/context.h"
 #include "utils/globals.h"
-#include <iostream>
 #include <fmt/base.h>
-#include <filesystem>
 #include <string>
-
-#define TOML_EXCEPTIONS 0
-#include <toml++/toml.hpp>
+#include <fstream>
 
 #include "utils.h"
 #include "../core/context.h"
+#include "../core/command.h"
 
 using namespace std;
 
-static toml::table config;
-
-int load_config(const string &path) {
-    if (!filesystem::exists(path)) {
+int load_config(BshContext ctx) {
+    ifstream file(ctx.config_path, ios::binary);
+    if (!file) {
         return 2;
     }
 
-    toml::parse_result result = toml::parse_file(path);
+    string file_contents = string(
+        (istreambuf_iterator<char>(file)),
+        istreambuf_iterator<char>()
+    );
 
-    if (result.failed()) {
-        cout << result.error() << endl;
-        return 1;
-    } else {
-        config = result.table();
-        return 0;
+    for (const string &command : prepare_input(file_contents)) {
+        ctx.command = command;
+        if (ctx.command.empty()) {
+            continue;
+        }
+        if (!handle_command(ctx)) {
+            exit(0);
+        }
+        if (last_exit_code != 0) {
+            fmt::println("warning: \"{}\" exited with code {}", ctx.command, last_exit_code);
+        }
     }
+
+    last_exit_code = 0;
+    last_command_duration = 0;
+
+    return 0;
 }
 
 string get_prompt(const BshContext &context) {
-    string prompt = config["prompt"].value_or("\033[34mUSERNAME@HOSTNAME:\033[36mWORKINGDIRECTORY\033[33mEXITCODE PROMPTSYMBOL ");
-    //string prompt = "[DURATION] [TIME] PROMPTSYMBOL ";
+    string prompt = get_var_or("PROMPT", "\033[34mUSERNAME@HOSTNAME:\033[36mWORKINGDIRECTORY\033[33mEXITCODE PROMPTSYMBOL ");
 
     replace_all(prompt, "USERNAME", context.username);
     replace_all(prompt, "HOSTNAME", context.hostname);
