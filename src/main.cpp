@@ -156,11 +156,11 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        last_command_duration = 0;
-        chrono::system_clock::time_point now = chrono::system_clock::now();
+        // start time measurement
+        chrono::steady_clock::time_point begin = chrono::steady_clock::now();
 
         string input = string(input_c);
-        ::free(input_c);
+        free(input_c);
         for (const string &command : prepare_input(input)) {
             bsh_context.command = command;
             if (bsh_context.command.empty()) {
@@ -185,6 +185,10 @@ int main(int argc, char* argv[]) {
             history_file.open(homedir + "/.bsh_history", ios::app);
             clear_history_file = false;
         }
+
+        // calculate time
+        chrono::steady_clock::time_point end = chrono::steady_clock::now();
+        last_command_duration = static_cast<long>(chrono::duration_cast<chrono::milliseconds>(end - begin).count());
     }
 
     if (history_file.is_open()) {
