@@ -2,7 +2,6 @@
 #define CONFIG_H
 
 #include <string>
-#include <toml++/toml.hpp>
 
 #include "../core/context.h"
 
