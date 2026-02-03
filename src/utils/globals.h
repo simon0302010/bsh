@@ -14,5 +14,6 @@ inline long last_command_duration = 0; // time last command took to execute in m
 inline std::pmr::unordered_map<std::string, std::string> environment_vars;
 inline std::vector<std::string> unset_vars;
 inline std::vector<std::string> current_vars;
+inline std::vector<std::string> path_names; // names of all executables in PATH
 
 #endif
