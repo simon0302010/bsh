@@ -9,12 +9,15 @@
 #include <optional>
 #include <string>
 #include <sys/types.h>
+#include <functional>
 #include <unistd.h>
+#include <unordered_map>
 #include <vector>
 #include <sys/wait.h>
 #include <fcntl.h>
 
 #include "context.h"
+#include "completions.h"
 #include "../utils/utils.h"
 #include "../builtins/cd.h"
 #include "../builtins/about.h"
@@ -40,6 +43,15 @@ struct Cmd {
     optional<WriterProperties> stdout_stream = nullopt;
     optional<WriterProperties> stderr_stream = nullopt;
     vector<string> args;
+};
+
+const unordered_map<string, function<int(BshContext &)>> builtins = {
+    {"about", about_command},
+    {"cd", cd_command},
+    {"pwd", pwd_command},
+    {"history", history_command},
+    {"export", export_command},
+    {"unset", unset_command}
 };
 
 // TODO: better parsing
@@ -307,22 +319,15 @@ bool handle_command(BshContext &bsh_context) {
     bsh_context.args = args;
     if (exe == "exit") {
         return false;
-    } else if (exe == "pwd") {
-        fmt::println("{}", bsh_context.current_dir);
-        last_exit_code = 0;
-    } else if (exe == "cd") {
-        last_exit_code = cd_command(bsh_context, args);
-    } else if (exe == "about") {
-        last_exit_code = show_about();
-    } else if (exe == "history") {
-        last_exit_code = history_command(args);
-    } else if (exe == "export") {
-        last_exit_code = export_command(bsh_context);
-    } else if (exe == "unset") {
-        last_exit_code = unset_command(bsh_context);
+    } else if (builtins.find(exe) != builtins.end()) {
+        last_exit_code = builtins.at(exe)(bsh_context);
     } else {
         run_command(command, bsh_context.command);
     }
+
+    current_vars.clear();
+
+    // get_path_names();
 
     return true;
 }

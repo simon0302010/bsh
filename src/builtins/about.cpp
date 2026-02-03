@@ -1,9 +1,10 @@
 #include "about.h"
+#include "core/context.h"
 #include <fmt/core.h>
 
 using namespace fmt;
 
-int show_about() {
+int about_command(BshContext &) {
     println("bsh Version 0.3");
     println("");
     println("bsh  Copyright (C) 2026  simon0302010");

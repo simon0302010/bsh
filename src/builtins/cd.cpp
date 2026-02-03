@@ -9,15 +9,20 @@
 using namespace std;
 using namespace fmt;
 
-int cd_command(BshContext &bsh_context, const vector<string> &args) {
+int pwd_command(BshContext &bsh_context) {
+    fmt::println("{}", bsh_context.current_dir);
+    return 0;
+}
+
+int cd_command(BshContext &bsh_context) {
     namespace fs = std::filesystem;
 
     fs::path target;
 
-    if (args.empty()) {
+    if (bsh_context.args.empty()) {
         target = bsh_context.home_dir;
     } else {
-        fs::path arg = args[0];
+        fs::path arg = bsh_context.args[0];
         target = arg.is_absolute()
             ? arg
             : fs::path(bsh_context.current_dir) / arg;

@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 
 #include "../utils/globals.h"
+#include "core/context.h"
 
 using namespace std;
 using namespace fmt;
@@ -13,19 +14,19 @@ void history_help() {
     println("Available options are [show, delete, help]");
 }
 
-int history_command(const vector<string> &args) {
-    if (args.empty()) {
+int history_command(BshContext &bsh_context) {
+    if (bsh_context.args.empty()) {
         history_help();
-    } else if (args[0] == "help") {
+    } else if (bsh_context.args[0] == "help") {
         history_help();
-    } else if (args[0] == "show") {
+    } else if (bsh_context.args[0] == "show") {
         for (const string &entry : history) {
             println("{}", entry);
         }
-    } else if (args[0] == "delete") {
+    } else if (bsh_context.args[0] == "delete") {
         clear_history_file = true;
     } else {
-        println("Invalid option: {}", args[0]);
+        println("Invalid option: {}", bsh_context.args[0]);
         history_help();
     }
 

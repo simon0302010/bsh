@@ -1,6 +1,8 @@
 #ifndef ABOUT_H
 #define ABOUT_H
 
-int show_about();
+#include "../core/context.h"
+
+int about_command(BshContext &);
 
 #endif

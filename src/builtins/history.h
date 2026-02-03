@@ -1,9 +1,8 @@
 #ifndef BUILTINS_HISTORY_H
 #define BUILTINS_HISTORY_H
 
-#include <vector>
-#include <string>
+#include "../core/context.h"
 
-int history_command(const std::vector<std::string> &args);
+int history_command(BshContext &bsh_context);
 
 #endif

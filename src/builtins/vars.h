@@ -3,7 +3,7 @@
 
 #include "core/context.h"
 
-int export_command(const BshContext &context);
-int unset_command(const BshContext &context);
+int export_command(BshContext &context);
+int unset_command(BshContext &context);
 
 #endif

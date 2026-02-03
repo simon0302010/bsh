@@ -10,7 +10,7 @@
 using namespace std;
 using namespace fmt;
 
-int export_command(const BshContext &context) {
+int export_command(BshContext &context) {
     if (context.args.empty()) {
         for (const string &var : get_env()) {
             println("{}", var);
@@ -30,7 +30,7 @@ int export_command(const BshContext &context) {
     return 0;
 }
 
-int unset_command(const BshContext &context) {
+int unset_command(BshContext &context) {
     if (context.args.empty()) {
         println("unset: not enough arguments");
         return 1;
