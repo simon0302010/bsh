@@ -11,7 +11,7 @@ using namespace fmt;
 
 void history_help() {
     println("Usage: history <option>");
-    println("Available options are [show, delete, help]");
+    println("Available options are [show, delete, size, help]");
 }
 
 int history_command(BshContext &bsh_context) {
@@ -23,6 +23,8 @@ int history_command(BshContext &bsh_context) {
         for (const string &entry : history) {
             println("{}", entry);
         }
+    } else if (bsh_context.args[0] == "size") {
+        println("{} command(s)", history.size());
     } else if (bsh_context.args[0] == "delete") {
         clear_history_file = true;
     } else {
