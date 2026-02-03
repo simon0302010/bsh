@@ -31,6 +31,11 @@ void get_path_names() {
     set<string> executables;
 
     for (const fs::path &dir : directories) {
+        if (!fs::exists(dir)) {
+            println("warning: the directory \"{}\" is in PATH but does not exist", dir.string());
+            continue;
+        }
+
         for (const auto &entry : fs::directory_iterator(dir)) {
             if (entry.is_regular_file() && (fs::status(entry).permissions() & fs::perms::owner_exec) != fs::perms::none) {
                 executables.insert(entry.path().filename().string());
