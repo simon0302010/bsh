@@ -55,6 +55,11 @@ yay -S bsh-git
 
 Just run `bsh`.
 
+## Notes
+
+- This shell is still in development, so expect bugs and missing features.
+- When the PATH environment variable is changed, the command changing it will take around 50ms more to execute due to the list of available commands being rebuilt.
+
 ## License
 
 This project is licensed under the GNU General Public License Version 3. For more information, see the [LICENSE](LICENSE) file.

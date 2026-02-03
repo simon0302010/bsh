@@ -6,12 +6,13 @@
 #include <filesystem>
 
 #include "../utils/utils.h"
+#include "utils/globals.h"
 
 using namespace std;
 using namespace fmt;
 namespace fs = std::filesystem;
 
-optional<vector<string>> get_path_names() {
+void get_path_names() {
     vector<string> environment = get_env();
 
     optional<string> path_var = nullopt;
@@ -23,7 +24,7 @@ optional<vector<string>> get_path_names() {
     }
 
     if (!path_var) {
-        return nullopt;
+        return;
     }
 
     vector<string> directories = split_string(*path_var, ':');
@@ -37,9 +38,5 @@ optional<vector<string>> get_path_names() {
         }
     }
 
-    for (const string &s : executables) {
-        println("{}", s);
-    }
-
-    return nullopt;
+    path_names.assign(executables.begin(), executables.end());
 }

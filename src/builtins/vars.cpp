@@ -6,6 +6,7 @@
 #include "core/context.h"
 #include "fmt/base.h"
 #include "fmt/core.h"
+#include "../core/completions.h"
 
 using namespace std;
 using namespace fmt;
@@ -39,6 +40,10 @@ int unset_command(BshContext &context) {
             environment_vars.erase(arg);
             unset_vars.push_back(arg);
         }
+    }
+
+    if (find(context.args.begin(), context.args.end(), "PATH") != context.args.end()) {
+        get_path_names();
     }
 
     return 0;

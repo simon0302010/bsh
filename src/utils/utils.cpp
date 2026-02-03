@@ -15,6 +15,7 @@
 
 #include "globals.h"
 #include "utils.h"
+#include "../core/completions.h"
 
 using namespace std;
 
@@ -347,6 +348,11 @@ void set_env(const string &key, const string &value) {
     }
 
     environment_vars[key] = value;
+
+    // updating list of callable executables when PATH environment variable changed
+    if (key == "PATH") {
+        get_path_names();
+    }
 }
 
 string get_var(const string &key) {

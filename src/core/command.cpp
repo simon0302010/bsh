@@ -17,7 +17,6 @@
 #include <fcntl.h>
 
 #include "context.h"
-#include "completions.h"
 #include "../utils/utils.h"
 #include "../builtins/cd.h"
 #include "../builtins/about.h"
@@ -326,8 +325,6 @@ bool handle_command(BshContext &bsh_context) {
     }
 
     current_vars.clear();
-
-    // get_path_names();
 
     return true;
 }
